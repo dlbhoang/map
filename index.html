@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <title>Tìm đường A → B & Quán ăn gần</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.css" />
+  <style>
+    body { margin: 0; font-family: sans-serif; }
+    #controls {
+      padding: 10px;
+      background: #f2f2f2;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+    }
+    input, select, button {
+      padding: 6px;
+      font-size: 14px;
+    }
+    #map {
+      height: 70vh;
+    }
+    #results {
+      padding: 10px;
+      max-height: 30vh;
+      overflow-y: auto;
+      border-top: 1px solid #ccc;
+      background: #fafafa;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    th, td {
+      border: 1px solid #ddd;
+      padding: 6px;
+      text-align: left;
+    }
+    th {
+      background-color: #f0f0f0;
+    }
+  </style>
+</head>
+<body>
+  <div id="controls">
+    <label>Điểm A:</label>
+    <input type="text" id="pointA" placeholder="Nhập địa chỉ A" size="25">
+    <label>Điểm B:</label>
+    <input type="text" id="pointB" placeholder="Nhập địa chỉ B" size="25">
+    <label>Phương tiện:</label>
+    <select id="vehicle">
+      <option value="car">Ô tô 🚗</option>
+      <option value="bike">Xe máy 🛵</option>
+    </select>
+    <label>Lọc khoảng cách:</label>
+    <select id="distanceFilter">
+      <option value="1">Dưới 1km</option>
+      <option value="3">Dưới 3km</option>
+      <option value="5" selected>Dưới 5km</option>
+    </select>
+    <button onclick="handleRoute()">Tìm đường</button>
+  </div>
+
+  <div id="map"></div>
+
+  <div id="results">
+    <h3>Danh sách quán ăn gần điểm B:</h3>
+    <table id="placesTable">
+      <thead>
+        <tr><th>Tên quán</th><th>Loại</th><th>Khoảng cách (km)</th></tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <!-- JS -->
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.js"></script>
+
+  <script>
+    const map = L.map("map").setView([10.762622, 106.660172], 13);
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      maxZoom: 19,
+      attribution: '&copy; <a href="https://openstreetmap.org">OpenStreetMap</a> contributors'
+    }).addTo(map);
+
+    let routeControl = null;
+
+    async function geocodeAddress(address) {
+      const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}`);
+      const data = await res.json();
+      if (data.length > 0) {
+        return [parseFloat(data[0].lat), parseFloat(data[0].lon)];
+      }
+      return null;
+    }
+
+    function haversineDistance(lat1, lon1, lat2, lon2) {
+      function toRad(x) { return x * Math.PI / 180; }
+      const R = 6371;
+      const dLat = toRad(lat2 - lat1);
+      const dLon = toRad(lon2 - lon1);
+      const a = Math.sin(dLat / 2) ** 2 + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+      return R * c;
+    }
+
+    async function findNearbyPlaces(lat, lon, maxDistanceKm) {
+      const overpassUrl = "https://overpass-api.de/api/interpreter";
+      const query = `
+        [out:json];
+        node(around:${maxDistanceKm * 1000}, ${lat}, ${lon})[amenity~"restaurant|fast_food|cafe|bar|pub|food_court|ice_cream|bakery"];
+        out;
+      `;
+      const response = await fetch(overpassUrl, {
+        method: "POST",
+        body: query,
+      });
+      const json = await response.json();
+      const tableBody = document.querySelector("#placesTable tbody");
+      tableBody.innerHTML = "";
+
+      json.elements.forEach((el) => {
+        const distance = haversineDistance(lat, lon, el.lat, el.lon);
+        if (distance <= maxDistanceKm) {
+          const name = el.tags.name || "Quán ăn";
+          const type = el.tags.amenity || "restaurant";
+
+          const iconMap = {
+            restaurant: "https://cdn-icons-png.flaticon.com/512/3075/3075977.png",
+            fast_food: "https://cdn-icons-png.flaticon.com/512/3595/3595455.png",
+            cafe: "https://cdn-icons-png.flaticon.com/512/2979/2979647.png",
+            bar: "https://cdn-icons-png.flaticon.com/512/1247/1247833.png",
+            pub: "https://cdn-icons-png.flaticon.com/512/483/483356.png",
+            food_court: "https://cdn-icons-png.flaticon.com/512/1532/1532782.png",
+            ice_cream: "https://cdn-icons-png.flaticon.com/512/685/685352.png",
+            bakery: "https://cdn-icons-png.flaticon.com/512/3132/3132693.png",
+          };
+          const iconUrl = iconMap[type] || "https://cdn-icons-png.flaticon.com/512/1046/1046784.png";
+
+          const icon = L.icon({
+            iconUrl,
+            iconSize: [28, 28],
+            iconAnchor: [14, 28],
+          });
+
+          L.marker([el.lat, el.lon], { icon })
+            .addTo(map)
+            .bindPopup(`<b>${name}</b><br>Loại: ${type}<br>Khoảng cách: ${distance.toFixed(2)} km`);
+
+          const row = document.createElement("tr");
+          row.innerHTML = `<td>${name}</td><td>${type}</td><td>${distance.toFixed(2)}</td>`;
+          tableBody.appendChild(row);
+        }
+      });
+    }
+
+    async function handleRoute() {
+      const pointA = document.getElementById("pointA").value.trim();
+      const pointB = document.getElementById("pointB").value.trim();
+      const vehicle = document.getElementById("vehicle").value;
+      const maxDistance = parseFloat(document.getElementById("distanceFilter").value);
+
+      if (!pointA || !pointB) {
+        alert("Hãy nhập đủ địa chỉ A và B.");
+        return;
+      }
+
+      const start = await geocodeAddress(pointA);
+      const end = await geocodeAddress(pointB);
+
+      if (!start || !end) {
+        alert("Không tìm thấy địa chỉ A hoặc B.");
+        return;
+      }
+
+      if (routeControl) map.removeControl(routeControl);
+
+      routeControl = L.Routing.control({
+        waypoints: [L.latLng(start[0], start[1]), L.latLng(end[0], end[1])],
+        router: L.Routing.osrmv1({
+          serviceUrl: 'https://router.project-osrm.org/route/v1',
+          profile: vehicle
+        }),
+        lineOptions: {
+          styles: [{ color: 'blue', opacity: 0.7, weight: 5 }]
+        },
+        routeWhileDragging: false,
+        createMarker: function (i, wp) {
+          const label = i === 0 ? "🚩 Điểm A" : "🏁 Điểm B";
+          return L.marker(wp.latLng).bindPopup(label).openPopup();
+        }
+      }).addTo(map);
+
+      routeControl.on("routesfound", function (e) {
+        const bounds = L.latLngBounds(e.routes[0].coordinates.map(c => L.latLng(c.lat, c.lng)));
+        map.fitBounds(bounds.pad(0.2));
+      });
+
+      await findNearbyPlaces(end[0], end[1], maxDistance);
+    }
+  </script>
+</body>
+</html>
