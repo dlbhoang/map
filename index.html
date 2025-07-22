@@ -9,214 +9,33 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat:400,600&display=swap">
   <style>
     * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      font-family: "Montserrat", "Segoe UI", sans-serif;
-      background: linear-gradient(135deg, #e0eafc 0%, #cfdef3 100%);
-      color: #333;
-    }
-    .wrapper {
-      display: flex;
-      height: 100vh;
-    }
-    .sidebar {
-      width: 380px;
-      padding: 28px 24px;
-      background: #fff;
-      border-right: 1px solid #e3e6ee;
-      overflow-y: auto;
-      box-shadow: 2px 0 16px rgba(0,0,0,0.04);
-      border-radius: 0 24px 24px 0;
-      transition: box-shadow 0.3s;
-    }
-    .sidebar h2 {
-      margin-top: 0;
-      color: #2b7cff;
-      font-weight: 600;
-      font-size: 2rem;
-      letter-spacing: 1px;
-      margin-bottom: 18px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .sidebar h2::before {
-      content: "🗺️";
-      font-size: 1.5rem;
-    }
-    label {
-      font-weight: 500;
-      display: block;
-      margin-top: 14px;
-      color: #2b7cff;
-      letter-spacing: 0.5px;
-    }
-    input, textarea, select {
-      width: 100%;
-      padding: 12px;
-      margin-top: 6px;
-      border: 1.5px solid #e3e6ee;
-      border-radius: 10px;
-      font-size: 15px;
-      background: #f7f9fc;
-      transition: border 0.2s;
-      outline: none;
-    }
-    input:focus, textarea:focus, select:focus {
-      border-color: #2b7cff;
-      background: #eef4ff;
-    }
-    textarea {
-      resize: vertical;
-      min-height: 60px;
-      max-height: 180px;
-    }
-    button {
-      margin-top: 18px;
-      width: 100%;
-      padding: 12px;
-      border: none;
-      border-radius: 10px;
-      font-weight: bold;
-      background: linear-gradient(90deg, #2b7cff 60%, #6bc1ff 100%);
-      color: white;
-      cursor: pointer;
-      font-size: 1rem;
-      box-shadow: 0 2px 8px rgba(43,124,255,0.08);
-      transition: background 0.3s, box-shadow 0.2s, transform 0.2s;
-      letter-spacing: 0.5px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-    }
-    button:hover {
-      background: linear-gradient(90deg, #1a5dcc 60%, #4fa3e3 100%);
-      box-shadow: 0 4px 16px rgba(43,124,255,0.12);
-      transform: translateY(-2px) scale(1.01);
-    }
-    button:active {
-      transform: scale(0.98);
-    }
-    .top-controls {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-top: 22px;
-    }
-    .top-controls select {
-      flex: 1;
-      min-width: 120px;
-    }
-    .agents-table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 24px;
-      background: #f7f9fc;
-      border-radius: 12px;
-      overflow: hidden;
-      box-shadow: 0 2px 8px rgba(43,124,255,0.04);
-    }
-    .agents-table th, .agents-table td {
-      border: none;
-      padding: 10px 8px;
-      text-align: left;
-      font-size: 15px;
-    }
-    .agents-table th {
-      background: #eaf3ff;
-      color: #2b7cff;
-      font-weight: 600;
-      letter-spacing: 0.5px;
-    }
-    .agents-table td div {
-      width: 22px;
-      height: 22px;
-      border-radius: 6px;
-      border: 1.5px solid #e3e6ee;
-      box-shadow: 0 1px 4px rgba(43,124,255,0.08);
-    }
-    .agents-table td button {
-      background: #ff4d4f;
-      color: #fff;
-      border-radius: 6px;
-      padding: 4px 10px;
-      font-size: 1rem;
-      margin: 0;
-      box-shadow: 0 2px 8px rgba(255,77,79,0.12);
-      width: auto;
-      transition: background 0.2s;
-    }
-    .agents-table td button:hover {
-      background: #d9363e;
-    }
-    .agents-table tr:hover {
-      background: #eaf3ff;
-      transition: background 0.2s;
-    }
-    .map-container {
-      flex: 1;
-      position: relative;
-      border-radius: 24px 0 0 24px;
-      overflow: hidden;
-      box-shadow: 0 2px 16px rgba(43,124,255,0.08);
-      margin: 18px 18px 18px 0;
-      background: #e0eafc;
-    }
-    #map {
-      position: absolute;
-      top: 0; left: 0; right: 0; bottom: 0;
-    }
-    input[type="file"] {
-      margin-top: 10px;
-      background: #f7f9fc;
-      border: none;
-      font-size: 15px;
-      color: #2b7cff;
-    }
-    #loading {
-      display: none;
-      position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(255,255,255,0.7);
-      z-index: 999;
-      align-items: center;
-      justify-content: center;
-      font-size: 2rem;
-      color: #2b7cff;
-      gap: 16px;
-    }
-    @media (max-width: 900px) {
-      .wrapper {
-        flex-direction: column;
-      }
-      .sidebar {
-        width: 100%;
-        height: auto;
-        border-right: none;
-        border-bottom: 1px solid #e3e6ee;
-        border-radius: 0 0 24px 24px;
-      }
-      .map-container {
-        height: 60vh;
-        border-radius: 24px;
-        margin: 18px;
-      }
-    }
-    @media (max-width: 600px) {
-      .sidebar {
-        padding: 16px 8px;
-        border-radius: 0 0 16px 16px;
-      }
-      .map-container {
-        margin: 8px;
-        border-radius: 16px;
-      }
-      button, input, textarea, select {
-        font-size: 0.95rem;
-        padding: 10px;
-      }
-    }
+    body { margin: 0; font-family: "Montserrat", "Segoe UI", sans-serif; background: linear-gradient(135deg, #e0eafc 0%, #cfdef3 100%); color: #333; }
+    .wrapper { display: flex; height: 100vh; }
+    .sidebar { width: 380px; padding: 28px 24px; background: #fff; border-right: 1px solid #e3e6ee; overflow-y: auto; box-shadow: 2px 0 16px rgba(0,0,0,0.04); border-radius: 0 24px 24px 0; transition: box-shadow 0.3s; }
+    .sidebar h2 { margin-top: 0; color: #2b7cff; font-weight: 600; font-size: 2rem; letter-spacing: 1px; margin-bottom: 18px; display: flex; align-items: center; gap: 8px; }
+    .sidebar h2::before { content: "🗺️"; font-size: 1.5rem; }
+    label { font-weight: 500; display: block; margin-top: 14px; color: #2b7cff; letter-spacing: 0.5px; }
+    input, textarea, select { width: 100%; padding: 12px; margin-top: 6px; border: 1.5px solid #e3e6ee; border-radius: 10px; font-size: 15px; background: #f7f9fc; transition: border 0.2s; outline: none; }
+    input:focus, textarea:focus, select:focus { border-color: #2b7cff; background: #eef4ff; }
+    textarea { resize: vertical; min-height: 60px; max-height: 180px; }
+    button { margin-top: 18px; width: 100%; padding: 12px; border: none; border-radius: 10px; font-weight: bold; background: linear-gradient(90deg, #2b7cff 60%, #6bc1ff 100%); color: white; cursor: pointer; font-size: 1rem; box-shadow: 0 2px 8px rgba(43,124,255,0.08); transition: background 0.3s, box-shadow 0.2s, transform 0.2s; letter-spacing: 0.5px; display: flex; align-items: center; justify-content: center; gap: 8px; }
+    button:hover { background: linear-gradient(90deg, #1a5dcc 60%, #4fa3e3 100%); box-shadow: 0 4px 16px rgba(43,124,255,0.12); transform: translateY(-2px) scale(1.01); }
+    button:active { transform: scale(0.98); }
+    .top-controls { display: flex; align-items: center; gap: 10px; margin-top: 22px; }
+    .top-controls select { flex: 1; min-width: 120px; }
+    .agents-table { width: 100%; border-collapse: collapse; margin-top: 24px; background: #f7f9fc; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(43,124,255,0.04); }
+    .agents-table th, .agents-table td { border: none; padding: 10px 8px; text-align: left; font-size: 15px; }
+    .agents-table th { background: #eaf3ff; color: #2b7cff; font-weight: 600; letter-spacing: 0.5px; }
+    .agents-table td div { width: 22px; height: 22px; border-radius: 6px; border: 1.5px solid #e3e6ee; box-shadow: 0 1px 4px rgba(43,124,255,0.08); }
+    .agents-table td button { background: #ff4d4f; color: #fff; border-radius: 6px; padding: 4px 10px; font-size: 1rem; margin: 0; box-shadow: 0 2px 8px rgba(255,77,79,0.12); width: auto; transition: background 0.2s; }
+    .agents-table td button:hover { background: #d9363e; }
+    .agents-table tr:hover { background: #eaf3ff; transition: background 0.2s; }
+    .map-container { flex: 1; position: relative; border-radius: 24px 0 0 24px; overflow: hidden; box-shadow: 0 2px 16px rgba(43,124,255,0.08); margin: 18px 18px 18px 0; background: #e0eafc; }
+    #map { position: absolute; top: 0; left: 0; right: 0; bottom: 0; }
+    input[type="file"] { margin-top: 10px; background: #f7f9fc; border: none; font-size: 15px; color: #2b7cff; }
+    #loading { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(255,255,255,0.7); z-index: 999; align-items: center; justify-content: center; font-size: 2rem; color: #2b7cff; gap: 16px; }
+    @media (max-width: 900px) { .wrapper { flex-direction: column; } .sidebar { width: 100%; height: auto; border-right: none; border-bottom: 1px solid #e3e6ee; border-radius: 0 0 24px 24px; } .map-container { height: 60vh; border-radius: 24px; margin: 18px; } }
+    @media (max-width: 600px) { .sidebar { padding: 16px 8px; border-radius: 0 0 16px 16px; } .map-container { margin: 8px; border-radius: 16px; } button, input, textarea, select { font-size: 0.95rem; padding: 10px; } }
   </style>
 </head>
 <body>
@@ -232,65 +51,14 @@
       <input id="agentColor" type="color" value="#2b7cff">
       <label>Thời gian xuất phát:</label>
       <input id="agentTime" type="time" value="07:00">
-      <label>Tuyến đường (chọn hoặc nhập):</label>
-      <select id="predefinedRoutes" multiple size="10" style="margin-top:6px;">
-        <option>BCA Cục truyền thông - Nguyễn Hữu</option>
-        <option>BCA - 30 Trần Bình Trọng</option>
-        <option>Cục công nghệ cao - 58 Nguyễn Du, Hà Nội</option>
-        <option>Các đơn vị CA - Nguyễn Thượng Hiền</option>
-        <option>Cục Kỹ thuật nghiệp vụ - 10 Trần Quốc Toản</option>
-        <option>Cục Cảnh sát hình sự - 14 - 16 Tôn Thất Tùng</option>
-        <option>Cục CSGT - 112 Lê Duẩn</option>
-        <option>Cục QLHC - 47 Phạm Văn Đồng</option>
-        <option>Cục xây dựng phong trào - 54 Lê Đại Hành</option>
-        <option>Cục cảnh sát QLHC - 47 Phạm Văn Đồng</option>
-        <option>TT phát triển - Yên Xá, Tân Triều</option>
-        <option>Thanh tra Bộ - 99 Nguyễn Tuân</option>
-        <option>Cục CSGT - 123 Nguyễn Tuân</option>
-        <option>Cục Tổ chức cán bộ - 47 Phạm Văn Đồng</option>
-        <option>Bộ Tư lệnh Cảnh sát cơ động - Sở Tham mưu</option>
-        <option>Cục An ninh quốc gia - 25 Tô Ngọc Vân</option>
-        <option>Cục H58 nghiệm vụ - 67 Trần Hưng Đạo</option>
-        <option>TAND tối cao - 48 Lý Thường Kiệt</option>
-        <option>Viện kiểm sát tối cao - 27 Hùng Vương, Điện Biên Phủ</option>
-        <option>Cục phòng chống ma túy - Số 7 Lê Quang Đạo</option>
-        <option>Cục CS môi trường - 30 Trần Quốc Hoàn</option>
-        <option>Cục điều tra tội phạm ma túy - Ngõ 84 Phương Canh</option>
-        <option>Doanh trại K01 - 88 Xuân Phương</option>
-        <option>Cục điều tra - Số 1A Kiều Mai</option>
-        <option>Trung tâm huấn luyện K01 - Số 1A Kiều Mai</option>
-        <option>Bệnh viện y học cổ truyền BCA - 278 Lương Thế Vinh</option>
-        <option>Viện kiểm sát tối cao - 56 Phạm Văn Bạch</option>
-        <option>BCA - 47 Phạm Văn Đồng</option>
-        <option>Nhà máy in tiền quốc gia - 30 Phạm Văn Đồng</option>
-        <option>Kho bạc Nhà nước - 32 Cát Linh</option>
-        <option>Ngân hàng NN - 49 Lý Thái Tổ</option>
-        <option>Hội sở TW1 - Số 49B Bà Triệu</option>
-        <option>Vĩnh Hưng</option>
-        <option>Trụ sở Bộ Tài chính - Số 28 Trần Hưng Đạo</option>
-        <option>Kho viện hành chính quốc gia HCM</option>
-        <option>135 Ngô Thì Sỹ</option>
-        <option>Các đơn vị CA - 60 Nguyễn Văn Huyên</option>
-        <option>Công ty dịch vụ Agribank - Số 8 Chùa Bộc</option>
-        <option>Ngân hàng NN - Số 4 Xa Đàn</option>
-      </select>
-      <textarea id="agentRoute" placeholder="Hoặc nhập tuyến đường tuỳ ý"></textarea>
-      <label>Loại quán ăn:</label>
-      <select id="amenityType" multiple size="7" style="margin-top:6px;">
-        <option value="restaurant" selected>Nhà hàng</option>
-        <option value="cafe" selected>Cafe</option>
-        <option value="fast_food" selected>Fast food</option>
-        <option value="bakery" selected>Bánh ngọt</option>
-        <option value="ice_cream" selected>Kem</option>
-        <option value="bar">Bar</option>
-        <option value="pub">Pub</option>
-      </select>
+      <label>Tuyến đường (mỗi dòng 1 địa điểm):</label>
+      <textarea id="agentRoute" placeholder="VD:\nBộ Công an, 44 Yết Kiêu\nBộ Công an, 47 Phạm Văn Đồng"></textarea>
       <button onclick="addAgent()">
         <img src="https://cdn-icons-png.flaticon.com/512/992/992651.png" style="width:20px;vertical-align:middle;"> Thêm đoàn
       </button>
       <div class="top-controls">
         <select id="distanceSelect">
-          <option value="1">Lọc quán ăn: 1 km</option>
+          <option value="1">Bán kính: 1 km</option>
           <option value="3" selected>3 km</option>
           <option value="5">5 km</option>
           <option value="10">10 km</option>
@@ -311,19 +79,6 @@
         </thead>
         <tbody></tbody>
       </table>
-      <!-- Chức năng gộp/tách đoàn -->
-      <div style="margin-top:24px;">
-        <label>Gộp hai đoàn:</label>
-        <select id="mergeAgent1"></select>
-        <select id="mergeAgent2"></select>
-        <button onclick="mergeAgents()">Gộp đoàn</button>
-      </div>
-      <div style="margin-top:18px;">
-        <label>Tách đoàn:</label>
-        <select id="splitAgent"></select>
-        <input id="splitIndex" type="number" min="1" placeholder="Vị trí tách (ví dụ: 2)">
-        <button onclick="splitAgent()">Tách đoàn</button>
-      </div>
     </div>
     <div class="map-container">
       <div id="map"></div>
@@ -339,7 +94,6 @@
       maxZoom: 19
     }).addTo(map);
 
-    // Luôn xác định địa điểm ở Hà Nội
     async function geocodeAddress(address) {
       const fullAddress = address.includes("Hà Nội") ? address : address + ", Hà Nội";
       const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(fullAddress)}`);
@@ -356,55 +110,6 @@
       return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     }
 
-    async function findNearbyPlaces(lat, lon, maxDistanceKm, agentName) {
-      const amenitySelect = document.getElementById("amenityType");
-      const selectedTypes = Array.from(amenitySelect.selectedOptions).map(opt => opt.value);
-      const amenityQuery = selectedTypes.length > 0 ? selectedTypes.join("|") : "restaurant|cafe|fast_food|bakery|ice_cream|bar|pub";
-
-      const url = "https://overpass-api.de/api/interpreter";
-      const query = `
-        [out:json];
-        node(around:${maxDistanceKm * 1000}, ${lat}, ${lon})[amenity~"${amenityQuery}"];
-        out;
-      `;
-
-      const res = await fetch(url, { method: "POST", body: query });
-      const json = await res.json();
-
-      const iconMap = {
-        restaurant: "https://cdn-icons-png.flaticon.com/512/3075/3075977.png",
-        fast_food: "https://cdn-icons-png.flaticon.com/512/3595/3595455.png",
-        cafe: "https://cdn-icons-png.flaticon.com/512/2979/2979647.png",
-        bar: "https://cdn-icons-png.flaticon.com/512/1247/1247833.png",
-        pub: "https://cdn-icons-png.flaticon.com/512/483/483356.png",
-        food_court: "https://cdn-icons-png.flaticon.com/512/1532/1532782.png",
-        ice_cream: "https://cdn-icons-png.flaticon.com/512/685/685352.png",
-        bakery: "https://cdn-icons-png.flaticon.com/512/3132/3132693.png"
-      };
-
-      json.elements.forEach(el => {
-        const dist = haversineDistance(lat, lon, el.lat, el.lon);
-        if (dist <= maxDistanceKm) {
-          const name = el.tags.name || "Quán ăn";
-          const type = el.tags.amenity || "restaurant";
-          const iconUrl = iconMap[type] || "https://cdn-icons-png.flaticon.com/512/1046/1046784.png";
-
-          const customIcon = L.icon({
-            iconUrl: iconUrl,
-            iconSize: [28, 28],
-            iconAnchor: [14, 28],
-            popupAnchor: [0, -30]
-          });
-
-          L.marker([el.lat, el.lon], { icon: customIcon })
-            .addTo(map)
-            .bindPopup(
-              `<b>${name}</b><br>Loại: ${type}<br>Đoàn: ${agentName}<br>Khoảng cách: ${dist.toFixed(2)} km`
-            );
-        }
-      });
-    }
-
     function updateAgentTable() {
       const tbody = document.querySelector("#agentTable tbody");
       tbody.innerHTML = "";
@@ -418,20 +123,6 @@
           <td><button onclick="removeAgent(${index})">❌</button></td>
         `;
         tbody.appendChild(row);
-      });
-
-      // Update merge/split selects
-      const merge1 = document.getElementById("mergeAgent1");
-      const merge2 = document.getElementById("mergeAgent2");
-      const split = document.getElementById("splitAgent");
-      [merge1, merge2, split].forEach(sel => {
-        sel.innerHTML = "";
-        agents.forEach((agent, i) => {
-          const opt = document.createElement("option");
-          opt.value = i;
-          opt.textContent = agent.name;
-          sel.appendChild(opt.cloneNode(true));
-        });
       });
     }
 
@@ -462,7 +153,7 @@
       document.getElementById("loading").style.display = "flex";
       setTimeout(async () => {
         map.eachLayer(layer => {
-          if (layer instanceof L.Marker || layer instanceof L.Polyline || layer instanceof L.TileLayer) {
+          if (!(layer instanceof L.TileLayer)) {
             map.removeLayer(layer);
           }
         });
@@ -472,7 +163,54 @@
           maxZoom: 19
         }).addTo(map);
 
-        const distance = parseFloat(document.getElementById("distanceSelect").value);
+        // Danh sách mục tiêu
+        const targets = [
+          "BCA Cục truyền thông - Nguyễn Hữu",
+          "BCA - 30 Trần Bình Trọng",
+          "Cục công nghệ cao - 58 Nguyễn Du, Hà Nội",
+          "Các đơn vị CA - Nguyễn Thượng Hiền",
+          "Cục Kỹ thuật nghiệp vụ - 10 Trần Quốc Toản",
+          "Cục Cảnh sát hình sự - 14 - 16 Tôn Thất Tùng",
+          "Cục CSGT - 112 Lê Duẩn",
+          "Cục QLHC - 47 Phạm Văn Đồng",
+          "Cục xây dựng phong trào - 54 Lê Đại Hành",
+          "Cục cảnh sát QLHC - 47 Phạm Văn Đồng",
+          "TT phát triển - Yên Xá, Tân Triều",
+          "Thanh tra Bộ - 99 Nguyễn Tuân",
+          "Cục CSGT - 123 Nguyễn Tuân",
+          "Cục Tổ chức cán bộ - 47 Phạm Văn Đồng",
+          "Bộ Tư lệnh Cảnh sát cơ động - Sở Tham mưu",
+          "Cục An ninh quốc gia - 25 Tô Ngọc Vân",
+          "Cục H58 nghiệm vụ - 67 Trần Hưng Đạo",
+          "TAND tối cao - 48 Lý Thường Kiệt",
+          "Viện kiểm sát tối cao - 27 Hùng Vương, Điện Biên Phủ",
+          "Cục phòng chống ma túy - Số 7 Lê Quang Đạo",
+          "Cục CS môi trường - 30 Trần Quốc Hoàn",
+          "Cục điều tra tội phạm ma túy - Ngõ 84 Phương Canh",
+          "Doanh trại K01 - 88 Xuân Phương",
+          "Cục điều tra - Số 1A Kiều Mai",
+          "Trung tâm huấn luyện K01 - Số 1A Kiều Mai",
+          "Bệnh viện y học cổ truyền BCA - 278 Lương Thế Vinh",
+          "Viện kiểm sát tối cao - 56 Phạm Văn Bạch",
+          "BCA - 47 Phạm Văn Đồng",
+          "Nhà máy in tiền quốc gia - 30 Phạm Văn Đồng",
+          "Kho bạc Nhà nước - 32 Cát Linh",
+          "Ngân hàng NN - 49 Lý Thái Tổ",
+          "Hội sở TW1 - Số 49B Bà Triệu",
+          "Vĩnh Hưng",
+          "Trụ sở Bộ Tài chính - Số 28 Trần Hưng Đạo",
+          "Kho viện hành chính quốc gia HCM",
+          "135 Ngô Thì Sỹ",
+          "Các đơn vị CA - 60 Nguyễn Văn Huyên",
+          "Công ty dịch vụ Agribank - Số 8 Chùa Bộc",
+          "Ngân hàng NN - Số 4 Xa Đàn"
+        ];
+
+        // Geocode tất cả mục tiêu trước để tránh gọi API lặp lại
+        const targetCoords = {};
+        for (const t of targets) {
+          targetCoords[t] = await geocodeAddress(t);
+        }
 
         for (const agent of agents) {
           const waypoints = [];
@@ -480,7 +218,24 @@
             const coords = await geocodeAddress(point);
             if (coords) {
               waypoints.push(L.latLng(coords[0], coords[1]));
-              await findNearbyPlaces(coords[0], coords[1], distance, agent.name);
+
+              // Hiển thị các mục tiêu khác gần điểm này dưới 5km
+              for (const t of targets) {
+                if (t !== point && targetCoords[t]) {
+                  const dist = haversineDistance(coords[0], coords[1], targetCoords[t][0], targetCoords[t][1]);
+                  if (dist <= 5) {
+                    L.marker([targetCoords[t][0], targetCoords[t][1]], {
+                      icon: L.icon({
+                        iconUrl: "https://cdn-icons-png.flaticon.com/512/484/484167.png", // icon cam mục tiêu
+                        iconSize: [32, 32],
+                        iconAnchor: [16, 32],
+                        popupAnchor: [0, -32]
+                      })
+                    }).addTo(map)
+                    .bindPopup(`<div style="font-size:1.1em;"><b style="color:#e67e22;">🎯 ${t}</b><br><span style="color:#555;">Cách <b>${point}</b>: <b>${dist.toFixed(2)} km</b></span></div>`);
+                  }
+                }
+              }
             }
           }
 
@@ -501,11 +256,11 @@
                 const iconSize = [35, 35];
 
                 if (i === 0) {
-                  iconUrl = "https://cdn-icons-png.flaticon.com/512/684/684908.png";
+                  iconUrl = "https://cdn-icons-png.flaticon.com/512/684/684908.png"; // xanh
                 } else if (i === waypoints.length - 1) {
-                  iconUrl = "https://cdn-icons-png.flaticon.com/512/149/149060.png";
+                  iconUrl = "https://cdn-icons-png.flaticon.com/512/149/149060.png"; // đỏ
                 } else {
-                  iconUrl = "https://cdn-icons-png.flaticon.com/512/252/252025.png";
+                  iconUrl = "https://cdn-icons-png.flaticon.com/512/565/565547.png"; // xám
                 }
 
                 const icon = L.icon({
@@ -516,13 +271,13 @@
                 });
 
                 const label = i === 0
-                  ? "🚩 Xuất phát"
+                  ? "<span style='color:#2b7cff;'>🚩 Xuất phát</span>"
                   : i === waypoints.length - 1
-                    ? "🏁 Kết thúc"
-                    : `📍 Trung điểm ${i + 1}`;
+                    ? "<span style='color:#ff4d4f;'>🏁 Kết thúc</span>"
+                    : `<span style='color:#888;'>📍 Trung điểm ${i + 1}</span>`;
 
                 return L.marker(wp.latLng, { icon }).bindPopup(
-                  `<b>${agent.name}</b><br>${label}<br>Giờ: ${agent.time}`
+                  `<div style="font-size:1.1em;"><b>${agent.name}</b><br>${label}<br>Giờ: <b>${agent.time}</b></div>`
                 );
               }
             }).addTo(map);
@@ -543,83 +298,17 @@
     function loadAgents(event) {
       const file = event.target.files[0];
       if (!file) return;
-
       const reader = new FileReader();
-      reader.onload = (e) => {
+      reader.onload = e => {
         try {
-          const json = JSON.parse(e.target.result);
-          agents = json;
+          agents = JSON.parse(e.target.result);
           updateAgentTable();
-          alert("Tải đoàn thành công!");
         } catch (err) {
-          alert("Lỗi định dạng file. Vui lòng thử lại.");
+          alert("File JSON không hợp lệ.");
         }
       };
       reader.readAsText(file);
     }
-
-    // Gộp hai đoàn thành một
-    function mergeAgents() {
-      const idx1 = parseInt(document.getElementById("mergeAgent1").value);
-      const idx2 = parseInt(document.getElementById("mergeAgent2").value);
-      if (isNaN(idx1) || isNaN(idx2) || idx1 === idx2) {
-        alert("Chọn hai đoàn khác nhau để gộp.");
-        return;
-      }
-      const agent1 = agents[idx1];
-      const agent2 = agents[idx2];
-      const mergedAgent = {
-        name: agent1.name + " + " + agent2.name,
-        color: agent1.color,
-        time: agent1.time,
-        route: [...agent1.route, ...agent2.route]
-      };
-      if (idx1 > idx2) {
-        agents.splice(idx1, 1);
-        agents.splice(idx2, 1);
-      } else {
-        agents.splice(idx2, 1);
-        agents.splice(idx1, 1);
-      }
-      agents.push(mergedAgent);
-      updateAgentTable();
-    }
-
-    // Tách một đoàn thành hai đoàn
-    function splitAgent() {
-      const idx = parseInt(document.getElementById("splitAgent").value);
-      const splitIdx = parseInt(document.getElementById("splitIndex").value);
-      if (isNaN(idx) || isNaN(splitIdx)) {
-        alert("Chọn đoàn và vị trí tách.");
-        return;
-      }
-      const agent = agents[idx];
-      if (splitIdx < 1 || splitIdx >= agent.route.length) {
-        alert("Vị trí tách không hợp lệ.");
-        return;
-      }
-      const agentA = {
-        name: agent.name + " (A)",
-        color: agent.color,
-        time: agent.time,
-        route: agent.route.slice(0, splitIdx)
-      };
-      const agentB = {
-        name: agent.name + " (B)",
-        color: agent.color,
-        time: agent.time,
-        route: agent.route.slice(splitIdx)
-      };
-      agents.splice(idx, 1);
-      agents.push(agentA, agentB);
-      updateAgentTable();
-    }
-
-    // Tự động điền tuyến đường khi chọn từ danh sách
-    document.getElementById("predefinedRoutes").addEventListener("change", function() {
-      const selected = Array.from(this.selectedOptions).map(opt => opt.text);
-      document.getElementById("agentRoute").value = selected.join("\n");
-    });
   </script>
 </body>
 </html>
