@@ -1,206 +1,521 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="UTF-8" />
-  <title>Tìm đường A → B & Quán ăn gần</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <title>Quản lý tuyến đường nhiều đoàn</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.css" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat:400,600&display=swap">
   <style>
-    body { margin: 0; font-family: sans-serif; }
-    #controls {
-      padding: 10px;
-      background: #f2f2f2;
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Montserrat", "Segoe UI", sans-serif;
+      background: linear-gradient(135deg, #e0eafc 0%, #cfdef3 100%);
+      color: #333;
+    }
+
+    .wrapper {
       display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      align-items: center;
+      height: 100vh;
     }
-    input, select, button {
-      padding: 6px;
-      font-size: 14px;
-    }
-    #map {
-      height: 70vh;
-    }
-    #results {
-      padding: 10px;
-      max-height: 30vh;
+
+    .sidebar {
+      width: 380px;
+      padding: 28px 24px;
+      background: #fff;
+      border-right: 1px solid #e3e6ee;
       overflow-y: auto;
-      border-top: 1px solid #ccc;
-      background: #fafafa;
+      box-shadow: 2px 0 16px rgba(0,0,0,0.04);
+      border-radius: 0 24px 24px 0;
+      transition: box-shadow 0.3s;
     }
-    table {
+
+    .sidebar h2 {
+      margin-top: 0;
+      color: #2b7cff;
+      font-weight: 600;
+      font-size: 2rem;
+      letter-spacing: 1px;
+      margin-bottom: 18px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .sidebar h2::before {
+      content: "🗺️";
+      font-size: 1.5rem;
+    }
+
+    label {
+      font-weight: 500;
+      display: block;
+      margin-top: 14px;
+      color: #2b7cff;
+      letter-spacing: 0.5px;
+    }
+
+    input, textarea, select {
+      width: 100%;
+      padding: 12px;
+      margin-top: 6px;
+      border: 1.5px solid #e3e6ee;
+      border-radius: 10px;
+      font-size: 15px;
+      background: #f7f9fc;
+      transition: border 0.2s;
+      outline: none;
+    }
+    input:focus, textarea:focus, select:focus {
+      border-color: #2b7cff;
+      background: #eef4ff;
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 60px;
+      max-height: 180px;
+    }
+
+    button {
+      margin-top: 18px;
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 10px;
+      font-weight: bold;
+      background: linear-gradient(90deg, #2b7cff 60%, #6bc1ff 100%);
+      color: white;
+      cursor: pointer;
+      font-size: 1rem;
+      box-shadow: 0 2px 8px rgba(43,124,255,0.08);
+      transition: background 0.3s, box-shadow 0.2s, transform 0.2s;
+      letter-spacing: 0.5px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    button:hover {
+      background: linear-gradient(90deg, #1a5dcc 60%, #4fa3e3 100%);
+      box-shadow: 0 4px 16px rgba(43,124,255,0.12);
+      transform: translateY(-2px) scale(1.01);
+    }
+    button:active {
+      transform: scale(0.98);
+    }
+
+    .top-controls {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 22px;
+    }
+
+    .top-controls select {
+      flex: 1;
+      min-width: 120px;
+    }
+
+    .agents-table {
       width: 100%;
       border-collapse: collapse;
+      margin-top: 24px;
+      background: #f7f9fc;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(43,124,255,0.04);
     }
-    th, td {
-      border: 1px solid #ddd;
-      padding: 6px;
+
+    .agents-table th, .agents-table td {
+      border: none;
+      padding: 10px 8px;
       text-align: left;
+      font-size: 15px;
     }
-    th {
-      background-color: #f0f0f0;
+
+    .agents-table th {
+      background: #eaf3ff;
+      color: #2b7cff;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+
+    .agents-table td div {
+      width: 22px;
+      height: 22px;
+      border-radius: 6px;
+      border: 1.5px solid #e3e6ee;
+      box-shadow: 0 1px 4px rgba(43,124,255,0.08);
+    }
+
+    .agents-table td button {
+      background: #ff4d4f;
+      color: #fff;
+      border-radius: 6px;
+      padding: 4px 10px;
+      font-size: 1rem;
+      margin: 0;
+      box-shadow: 0 2px 8px rgba(255,77,79,0.12);
+      width: auto;
+      transition: background 0.2s;
+    }
+    .agents-table td button:hover {
+      background: #d9363e;
+    }
+    .agents-table tr:hover {
+      background: #eaf3ff;
+      transition: background 0.2s;
+    }
+
+    .map-container {
+      flex: 1;
+      position: relative;
+      border-radius: 24px 0 0 24px;
+      overflow: hidden;
+      box-shadow: 0 2px 16px rgba(43,124,255,0.08);
+      margin: 18px 18px 18px 0;
+      background: #e0eafc;
+    }
+
+    #map {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+    }
+
+    input[type="file"] {
+      margin-top: 10px;
+      background: #f7f9fc;
+      border: none;
+      font-size: 15px;
+      color: #2b7cff;
+    }
+
+    #loading {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(255,255,255,0.7);
+      z-index: 999;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      color: #2b7cff;
+      gap: 16px;
+    }
+
+    @media (max-width: 900px) {
+      .wrapper {
+        flex-direction: column;
+      }
+      .sidebar {
+        width: 100%;
+        height: auto;
+        border-right: none;
+        border-bottom: 1px solid #e3e6ee;
+        border-radius: 0 0 24px 24px;
+      }
+      .map-container {
+        height: 60vh;
+        border-radius: 24px;
+        margin: 18px;
+      }
+    }
+    @media (max-width: 600px) {
+      .sidebar {
+        padding: 16px 8px;
+        border-radius: 0 0 16px 16px;
+      }
+      .map-container {
+        margin: 8px;
+        border-radius: 16px;
+      }
+      button, input, textarea, select {
+        font-size: 0.95rem;
+        padding: 10px;
+      }
     }
   </style>
 </head>
 <body>
-  <div id="controls">
-    <label>Điểm A:</label>
-    <input type="text" id="pointA" placeholder="Nhập địa chỉ A" size="25">
-    <label>Điểm B:</label>
-    <input type="text" id="pointB" placeholder="Nhập địa chỉ B" size="25">
-    <label>Phương tiện:</label>
-    <select id="vehicle">
-      <option value="car">Ô tô 🚗</option>
-      <option value="bike">Xe máy 🛵</option>
-    </select>
-    <label>Lọc khoảng cách:</label>
-    <select id="distanceFilter">
-      <option value="1">Dưới 1km</option>
-      <option value="3">Dưới 3km</option>
-      <option value="5" selected>Dưới 5km</option>
-    </select>
-    <button onclick="handleRoute()">Tìm đường</button>
+  <div id="loading">
+    <img src="https://cdn-icons-png.flaticon.com/512/833/833472.png" style="width:48px;margin-right:12px;"> Đang tải dữ liệu...
+  </div>
+  <div class="wrapper">
+    <div class="sidebar">
+      <h2>Quản lý tuyến đường</h2>
+
+      <label>Tên đoàn:</label>
+      <input id="agentName" placeholder="VD: Đoàn A">
+
+      <label>Màu tuyến:</label>
+      <input id="agentColor" type="color" value="#2b7cff">
+
+      <label>Thời gian xuất phát:</label>
+      <input id="agentTime" type="time" value="07:00">
+
+      <label>Tuyến đường (mỗi dòng 1 địa điểm):</label>
+      <textarea id="agentRoute" placeholder="VD:\nĐại học Bách Khoa\nChợ Bến Thành"></textarea>
+
+      <label>Loại quán ăn:</label>
+      <select id="amenityType" multiple size="7" style="margin-top:6px;">
+        <option value="restaurant" selected>Nhà hàng</option>
+        <option value="cafe" selected>Cafe</option>
+        <option value="fast_food" selected>Fast food</option>
+        <option value="bakery" selected>Bánh ngọt</option>
+        <option value="ice_cream" selected>Kem</option>
+        <option value="bar">Bar</option>
+        <option value="pub">Pub</option>
+      </select>
+
+      <button onclick="addAgent()">
+        <img src="https://cdn-icons-png.flaticon.com/512/992/992651.png" style="width:20px;vertical-align:middle;"> Thêm đoàn
+      </button>
+
+      <div class="top-controls">
+        <select id="distanceSelect">
+          <option value="1">Lọc quán ăn: 1 km</option>
+          <option value="3" selected>3 km</option>
+          <option value="5">5 km</option>
+          <option value="10">10 km</option>
+        </select>
+        <button onclick="showAllRoutes()">
+          <img src="https://cdn-icons-png.flaticon.com/512/684/684908.png" style="width:20px;vertical-align:middle;"> Vẽ tuyến
+        </button>
+      </div>
+
+      <button onclick="saveAgents()">
+        <img src="https://cdn-icons-png.flaticon.com/512/1828/1828926.png" style="width:20px;vertical-align:middle;"> Lưu JSON
+      </button>
+      <input type="file" onchange="loadAgents(event)">
+
+      <table class="agents-table" id="agentTable">
+        <thead>
+          <tr>
+            <th>Đoàn</th><th>Màu</th><th>Giờ</th><th>Điểm</th><th>Xoá</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <div class="map-container">
+      <div id="map"></div>
+    </div>
   </div>
 
-  <div id="map"></div>
-
-  <div id="results">
-    <h3>Danh sách quán ăn gần điểm B:</h3>
-    <table id="placesTable">
-      <thead>
-        <tr><th>Tên quán</th><th>Loại</th><th>Khoảng cách (km)</th></tr>
-      </thead>
-      <tbody></tbody>
-    </table>
-  </div>
-
-  <!-- JS -->
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
   <script src="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.js"></script>
-
   <script>
+    let agents = [];
     const map = L.map("map").setView([10.762622, 106.660172], 13);
     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      maxZoom: 19,
-      attribution: '&copy; <a href="https://openstreetmap.org">OpenStreetMap</a> contributors'
+      attribution: '&copy; OpenStreetMap',
+      maxZoom: 19
     }).addTo(map);
-
-    let routeControl = null;
 
     async function geocodeAddress(address) {
       const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}`);
       const data = await res.json();
-      if (data.length > 0) {
-        return [parseFloat(data[0].lat), parseFloat(data[0].lon)];
-      }
+      if (data.length > 0) return [parseFloat(data[0].lat), parseFloat(data[0].lon)];
       return null;
     }
 
     function haversineDistance(lat1, lon1, lat2, lon2) {
-      function toRad(x) { return x * Math.PI / 180; }
+      const toRad = deg => deg * Math.PI / 180;
       const R = 6371;
-      const dLat = toRad(lat2 - lat1);
-      const dLon = toRad(lon2 - lon1);
-      const a = Math.sin(dLat / 2) ** 2 + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
-      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-      return R * c;
+      const dLat = toRad(lat2 - lat1), dLon = toRad(lon2 - lon1);
+      const a = Math.sin(dLat/2)**2 + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon/2)**2;
+      return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     }
 
-    async function findNearbyPlaces(lat, lon, maxDistanceKm) {
-      const overpassUrl = "https://overpass-api.de/api/interpreter";
+    async function findNearbyPlaces(lat, lon, maxDistanceKm, agentName) {
+      const amenitySelect = document.getElementById("amenityType");
+      const selectedTypes = Array.from(amenitySelect.selectedOptions).map(opt => opt.value);
+      const amenityQuery = selectedTypes.length > 0 ? selectedTypes.join("|") : "restaurant|cafe|fast_food|bakery|ice_cream|bar|pub";
+
+      const url = "https://overpass-api.de/api/interpreter";
       const query = `
         [out:json];
-        node(around:${maxDistanceKm * 1000}, ${lat}, ${lon})[amenity~"restaurant|fast_food|cafe|bar|pub|food_court|ice_cream|bakery"];
+        node(around:${maxDistanceKm * 1000}, ${lat}, ${lon})[amenity~"${amenityQuery}"];
         out;
       `;
-      const response = await fetch(overpassUrl, {
-        method: "POST",
-        body: query,
-      });
-      const json = await response.json();
-      const tableBody = document.querySelector("#placesTable tbody");
-      tableBody.innerHTML = "";
 
-      json.elements.forEach((el) => {
-        const distance = haversineDistance(lat, lon, el.lat, el.lon);
-        if (distance <= maxDistanceKm) {
+      const res = await fetch(url, { method: "POST", body: query });
+      const json = await res.json();
+
+      const iconMap = {
+        restaurant: "https://cdn-icons-png.flaticon.com/512/3075/3075977.png",
+        fast_food: "https://cdn-icons-png.flaticon.com/512/3595/3595455.png",
+        cafe: "https://cdn-icons-png.flaticon.com/512/2979/2979647.png",
+        bar: "https://cdn-icons-png.flaticon.com/512/1247/1247833.png",
+        pub: "https://cdn-icons-png.flaticon.com/512/483/483356.png",
+        food_court: "https://cdn-icons-png.flaticon.com/512/1532/1532782.png",
+        ice_cream: "https://cdn-icons-png.flaticon.com/512/685/685352.png",
+        bakery: "https://cdn-icons-png.flaticon.com/512/3132/3132693.png"
+      };
+
+      json.elements.forEach(el => {
+        const dist = haversineDistance(lat, lon, el.lat, el.lon);
+        if (dist <= maxDistanceKm) {
           const name = el.tags.name || "Quán ăn";
           const type = el.tags.amenity || "restaurant";
-
-          const iconMap = {
-            restaurant: "https://cdn-icons-png.flaticon.com/512/3075/3075977.png",
-            fast_food: "https://cdn-icons-png.flaticon.com/512/3595/3595455.png",
-            cafe: "https://cdn-icons-png.flaticon.com/512/2979/2979647.png",
-            bar: "https://cdn-icons-png.flaticon.com/512/1247/1247833.png",
-            pub: "https://cdn-icons-png.flaticon.com/512/483/483356.png",
-            food_court: "https://cdn-icons-png.flaticon.com/512/1532/1532782.png",
-            ice_cream: "https://cdn-icons-png.flaticon.com/512/685/685352.png",
-            bakery: "https://cdn-icons-png.flaticon.com/512/3132/3132693.png",
-          };
           const iconUrl = iconMap[type] || "https://cdn-icons-png.flaticon.com/512/1046/1046784.png";
 
-          const icon = L.icon({
-            iconUrl,
+          const customIcon = L.icon({
+            iconUrl: iconUrl,
             iconSize: [28, 28],
             iconAnchor: [14, 28],
+            popupAnchor: [0, -30]
           });
 
-          L.marker([el.lat, el.lon], { icon })
+          L.marker([el.lat, el.lon], { icon: customIcon })
             .addTo(map)
-            .bindPopup(`<b>${name}</b><br>Loại: ${type}<br>Khoảng cách: ${distance.toFixed(2)} km`);
-
-          const row = document.createElement("tr");
-          row.innerHTML = `<td>${name}</td><td>${type}</td><td>${distance.toFixed(2)}</td>`;
-          tableBody.appendChild(row);
+            .bindPopup(
+              `<b>${name}</b><br>Loại: ${type}<br>Đoàn: ${agentName}<br>Khoảng cách: ${dist.toFixed(2)} km`
+            );
         }
       });
     }
 
-    async function handleRoute() {
-      const pointA = document.getElementById("pointA").value.trim();
-      const pointB = document.getElementById("pointB").value.trim();
-      const vehicle = document.getElementById("vehicle").value;
-      const maxDistance = parseFloat(document.getElementById("distanceFilter").value);
-
-      if (!pointA || !pointB) {
-        alert("Hãy nhập đủ địa chỉ A và B.");
-        return;
-      }
-
-      const start = await geocodeAddress(pointA);
-      const end = await geocodeAddress(pointB);
-
-      if (!start || !end) {
-        alert("Không tìm thấy địa chỉ A hoặc B.");
-        return;
-      }
-
-      if (routeControl) map.removeControl(routeControl);
-
-      routeControl = L.Routing.control({
-        waypoints: [L.latLng(start[0], start[1]), L.latLng(end[0], end[1])],
-        router: L.Routing.osrmv1({
-          serviceUrl: 'https://router.project-osrm.org/route/v1',
-          profile: vehicle
-        }),
-        lineOptions: {
-          styles: [{ color: 'blue', opacity: 0.7, weight: 5 }]
-        },
-        routeWhileDragging: false,
-        createMarker: function (i, wp) {
-          const label = i === 0 ? "🚩 Điểm A" : "🏁 Điểm B";
-          return L.marker(wp.latLng).bindPopup(label).openPopup();
-        }
-      }).addTo(map);
-
-      routeControl.on("routesfound", function (e) {
-        const bounds = L.latLngBounds(e.routes[0].coordinates.map(c => L.latLng(c.lat, c.lng)));
-        map.fitBounds(bounds.pad(0.2));
+    function updateAgentTable() {
+      const tbody = document.querySelector("#agentTable tbody");
+      tbody.innerHTML = "";
+      agents.forEach((agent, index) => {
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td>${agent.name}</td>
+          <td><div style="background:${agent.color}"></div></td>
+          <td>${agent.time}</td>
+          <td>${agent.route.length}</td>
+          <td><button onclick="removeAgent(${index})">❌</button></td>
+        `;
+        tbody.appendChild(row);
       });
+    }
 
-      await findNearbyPlaces(end[0], end[1], maxDistance);
+    function addAgent() {
+      const name = document.getElementById("agentName").value.trim();
+      const color = document.getElementById("agentColor").value;
+      const time = document.getElementById("agentTime").value;
+      const route = document.getElementById("agentRoute").value.trim().split("\n").filter(x => x);
+
+      if (!name || route.length < 2) {
+        alert("Nhập ít nhất 2 địa điểm.");
+        return;
+      }
+
+      agents.push({ name, color, time, route });
+      updateAgentTable();
+
+      document.getElementById("agentName").value = "";
+      document.getElementById("agentRoute").value = "";
+    }
+
+    function removeAgent(index) {
+      agents.splice(index, 1);
+      updateAgentTable();
+    }
+
+    async function showAllRoutes() {
+      document.getElementById("loading").style.display = "flex";
+      setTimeout(async () => {
+        map.eachLayer(layer => {
+          if (layer instanceof L.Marker || layer instanceof L.Polyline || layer instanceof L.TileLayer) {
+            map.removeLayer(layer);
+          }
+        });
+
+        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+          attribution: '&copy; OpenStreetMap',
+          maxZoom: 19
+        }).addTo(map);
+
+        const distance = parseFloat(document.getElementById("distanceSelect").value);
+
+        for (const agent of agents) {
+          const waypoints = [];
+          for (const point of agent.route) {
+            const coords = await geocodeAddress(point);
+            if (coords) {
+              waypoints.push(L.latLng(coords[0], coords[1]));
+              await findNearbyPlaces(coords[0], coords[1], distance, agent.name);
+            }
+          }
+
+          if (waypoints.length >= 2) {
+            L.Routing.control({
+              waypoints,
+              router: L.Routing.osrmv1({
+                serviceUrl: "https://router.project-osrm.org/route/v1",
+                profile: "car"
+              }),
+              lineOptions: {
+                styles: [{ color: agent.color, weight: 4 }]
+              },
+              addWaypoints: false,
+              draggableWaypoints: false,
+              createMarker: (i, wp) => {
+                let iconUrl;
+                const iconSize = [35, 35];
+
+                if (i === 0) {
+                  iconUrl = "https://cdn-icons-png.flaticon.com/512/684/684908.png";
+                } else if (i === waypoints.length - 1) {
+                  iconUrl = "https://cdn-icons-png.flaticon.com/512/149/149060.png";
+                } else {
+                  iconUrl = "https://cdn-icons-png.flaticon.com/512/252/252025.png";
+                }
+
+                const icon = L.icon({
+                  iconUrl,
+                  iconSize,
+                  iconAnchor: [iconSize[0] / 2, iconSize[1]],
+                  popupAnchor: [0, -30]
+                });
+
+                const label = i === 0
+                  ? "🚩 Xuất phát"
+                  : i === waypoints.length - 1
+                    ? "🏁 Kết thúc"
+                    : `📍 Trung điểm ${i + 1}`;
+
+                return L.marker(wp.latLng, { icon }).bindPopup(
+                  `<b>${agent.name}</b><br>${label}<br>Giờ: ${agent.time}`
+                );
+              }
+            }).addTo(map);
+          }
+        }
+        document.getElementById("loading").style.display = "none";
+      }, 100);
+    }
+
+    function saveAgents() {
+      const blob = new Blob([JSON.stringify(agents, null, 2)], { type: "application/json" });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = "agents.json";
+      link.click();
+    }
+
+    function loadAgents(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const json = JSON.parse(e.target.result);
+          agents = json;
+          updateAgentTable();
+          alert("Tải đoàn thành công!");
+        } catch (err) {
+          alert("Lỗi định dạng file. Vui lòng thử lại.");
+        }
+      };
+      reader.readAsText(file);
     }
   </script>
 </body>
