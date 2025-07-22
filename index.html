@@ -15,12 +15,10 @@
       background: linear-gradient(135deg, #e0eafc 0%, #cfdef3 100%);
       color: #333;
     }
-
     .wrapper {
       display: flex;
       height: 100vh;
     }
-
     .sidebar {
       width: 380px;
       padding: 28px 24px;
@@ -31,7 +29,6 @@
       border-radius: 0 24px 24px 0;
       transition: box-shadow 0.3s;
     }
-
     .sidebar h2 {
       margin-top: 0;
       color: #2b7cff;
@@ -47,7 +44,6 @@
       content: "🗺️";
       font-size: 1.5rem;
     }
-
     label {
       font-weight: 500;
       display: block;
@@ -55,7 +51,6 @@
       color: #2b7cff;
       letter-spacing: 0.5px;
     }
-
     input, textarea, select {
       width: 100%;
       padding: 12px;
@@ -71,13 +66,11 @@
       border-color: #2b7cff;
       background: #eef4ff;
     }
-
     textarea {
       resize: vertical;
       min-height: 60px;
       max-height: 180px;
     }
-
     button {
       margin-top: 18px;
       width: 100%;
@@ -105,19 +98,16 @@
     button:active {
       transform: scale(0.98);
     }
-
     .top-controls {
       display: flex;
       align-items: center;
       gap: 10px;
       margin-top: 22px;
     }
-
     .top-controls select {
       flex: 1;
       min-width: 120px;
     }
-
     .agents-table {
       width: 100%;
       border-collapse: collapse;
@@ -127,21 +117,18 @@
       overflow: hidden;
       box-shadow: 0 2px 8px rgba(43,124,255,0.04);
     }
-
     .agents-table th, .agents-table td {
       border: none;
       padding: 10px 8px;
       text-align: left;
       font-size: 15px;
     }
-
     .agents-table th {
       background: #eaf3ff;
       color: #2b7cff;
       font-weight: 600;
       letter-spacing: 0.5px;
     }
-
     .agents-table td div {
       width: 22px;
       height: 22px;
@@ -149,7 +136,6 @@
       border: 1.5px solid #e3e6ee;
       box-shadow: 0 1px 4px rgba(43,124,255,0.08);
     }
-
     .agents-table td button {
       background: #ff4d4f;
       color: #fff;
@@ -168,7 +154,6 @@
       background: #eaf3ff;
       transition: background 0.2s;
     }
-
     .map-container {
       flex: 1;
       position: relative;
@@ -178,12 +163,10 @@
       margin: 18px 18px 18px 0;
       background: #e0eafc;
     }
-
     #map {
       position: absolute;
       top: 0; left: 0; right: 0; bottom: 0;
     }
-
     input[type="file"] {
       margin-top: 10px;
       background: #f7f9fc;
@@ -191,7 +174,6 @@
       font-size: 15px;
       color: #2b7cff;
     }
-
     #loading {
       display: none;
       position: fixed;
@@ -204,7 +186,6 @@
       color: #2b7cff;
       gap: 16px;
     }
-
     @media (max-width: 900px) {
       .wrapper {
         flex-direction: column;
@@ -245,19 +226,55 @@
   <div class="wrapper">
     <div class="sidebar">
       <h2>Quản lý tuyến đường</h2>
-
       <label>Tên đoàn:</label>
       <input id="agentName" placeholder="VD: Đoàn A">
-
       <label>Màu tuyến:</label>
       <input id="agentColor" type="color" value="#2b7cff">
-
       <label>Thời gian xuất phát:</label>
       <input id="agentTime" type="time" value="07:00">
-
-      <label>Tuyến đường (mỗi dòng 1 địa điểm):</label>
-      <textarea id="agentRoute" placeholder="VD:\nĐại học Bách Khoa\nChợ Bến Thành"></textarea>
-
+      <label>Tuyến đường (chọn hoặc nhập):</label>
+      <select id="predefinedRoutes" multiple size="10" style="margin-top:6px;">
+        <option>BCA Cục truyền thông - Nguyễn Hữu</option>
+        <option>BCA - 30 Trần Bình Trọng</option>
+        <option>Cục công nghệ cao - 58 Nguyễn Du, Hà Nội</option>
+        <option>Các đơn vị CA - Nguyễn Thượng Hiền</option>
+        <option>Cục Kỹ thuật nghiệp vụ - 10 Trần Quốc Toản</option>
+        <option>Cục Cảnh sát hình sự - 14 - 16 Tôn Thất Tùng</option>
+        <option>Cục CSGT - 112 Lê Duẩn</option>
+        <option>Cục QLHC - 47 Phạm Văn Đồng</option>
+        <option>Cục xây dựng phong trào - 54 Lê Đại Hành</option>
+        <option>Cục cảnh sát QLHC - 47 Phạm Văn Đồng</option>
+        <option>TT phát triển - Yên Xá, Tân Triều</option>
+        <option>Thanh tra Bộ - 99 Nguyễn Tuân</option>
+        <option>Cục CSGT - 123 Nguyễn Tuân</option>
+        <option>Cục Tổ chức cán bộ - 47 Phạm Văn Đồng</option>
+        <option>Bộ Tư lệnh Cảnh sát cơ động - Sở Tham mưu</option>
+        <option>Cục An ninh quốc gia - 25 Tô Ngọc Vân</option>
+        <option>Cục H58 nghiệm vụ - 67 Trần Hưng Đạo</option>
+        <option>TAND tối cao - 48 Lý Thường Kiệt</option>
+        <option>Viện kiểm sát tối cao - 27 Hùng Vương, Điện Biên Phủ</option>
+        <option>Cục phòng chống ma túy - Số 7 Lê Quang Đạo</option>
+        <option>Cục CS môi trường - 30 Trần Quốc Hoàn</option>
+        <option>Cục điều tra tội phạm ma túy - Ngõ 84 Phương Canh</option>
+        <option>Doanh trại K01 - 88 Xuân Phương</option>
+        <option>Cục điều tra - Số 1A Kiều Mai</option>
+        <option>Trung tâm huấn luyện K01 - Số 1A Kiều Mai</option>
+        <option>Bệnh viện y học cổ truyền BCA - 278 Lương Thế Vinh</option>
+        <option>Viện kiểm sát tối cao - 56 Phạm Văn Bạch</option>
+        <option>BCA - 47 Phạm Văn Đồng</option>
+        <option>Nhà máy in tiền quốc gia - 30 Phạm Văn Đồng</option>
+        <option>Kho bạc Nhà nước - 32 Cát Linh</option>
+        <option>Ngân hàng NN - 49 Lý Thái Tổ</option>
+        <option>Hội sở TW1 - Số 49B Bà Triệu</option>
+        <option>Vĩnh Hưng</option>
+        <option>Trụ sở Bộ Tài chính - Số 28 Trần Hưng Đạo</option>
+        <option>Kho viện hành chính quốc gia HCM</option>
+        <option>135 Ngô Thì Sỹ</option>
+        <option>Các đơn vị CA - 60 Nguyễn Văn Huyên</option>
+        <option>Công ty dịch vụ Agribank - Số 8 Chùa Bộc</option>
+        <option>Ngân hàng NN - Số 4 Xa Đàn</option>
+      </select>
+      <textarea id="agentRoute" placeholder="Hoặc nhập tuyến đường tuỳ ý"></textarea>
       <label>Loại quán ăn:</label>
       <select id="amenityType" multiple size="7" style="margin-top:6px;">
         <option value="restaurant" selected>Nhà hàng</option>
@@ -268,11 +285,9 @@
         <option value="bar">Bar</option>
         <option value="pub">Pub</option>
       </select>
-
       <button onclick="addAgent()">
         <img src="https://cdn-icons-png.flaticon.com/512/992/992651.png" style="width:20px;vertical-align:middle;"> Thêm đoàn
       </button>
-
       <div class="top-controls">
         <select id="distanceSelect">
           <option value="1">Lọc quán ăn: 1 km</option>
@@ -284,12 +299,10 @@
           <img src="https://cdn-icons-png.flaticon.com/512/684/684908.png" style="width:20px;vertical-align:middle;"> Vẽ tuyến
         </button>
       </div>
-
       <button onclick="saveAgents()">
         <img src="https://cdn-icons-png.flaticon.com/512/1828/1828926.png" style="width:20px;vertical-align:middle;"> Lưu JSON
       </button>
       <input type="file" onchange="loadAgents(event)">
-
       <table class="agents-table" id="agentTable">
         <thead>
           <tr>
@@ -298,25 +311,38 @@
         </thead>
         <tbody></tbody>
       </table>
+      <!-- Chức năng gộp/tách đoàn -->
+      <div style="margin-top:24px;">
+        <label>Gộp hai đoàn:</label>
+        <select id="mergeAgent1"></select>
+        <select id="mergeAgent2"></select>
+        <button onclick="mergeAgents()">Gộp đoàn</button>
+      </div>
+      <div style="margin-top:18px;">
+        <label>Tách đoàn:</label>
+        <select id="splitAgent"></select>
+        <input id="splitIndex" type="number" min="1" placeholder="Vị trí tách (ví dụ: 2)">
+        <button onclick="splitAgent()">Tách đoàn</button>
+      </div>
     </div>
-
     <div class="map-container">
       <div id="map"></div>
     </div>
   </div>
-
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
   <script src="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.js"></script>
   <script>
     let agents = [];
-    const map = L.map("map").setView([10.762622, 106.660172], 13);
+    const map = L.map("map").setView([21.028511, 105.804817], 12); // Hà Nội
     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
       attribution: '&copy; OpenStreetMap',
       maxZoom: 19
     }).addTo(map);
 
+    // Luôn xác định địa điểm ở Hà Nội
     async function geocodeAddress(address) {
-      const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}`);
+      const fullAddress = address.includes("Hà Nội") ? address : address + ", Hà Nội";
+      const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(fullAddress)}`);
       const data = await res.json();
       if (data.length > 0) return [parseFloat(data[0].lat), parseFloat(data[0].lon)];
       return null;
@@ -392,6 +418,20 @@
           <td><button onclick="removeAgent(${index})">❌</button></td>
         `;
         tbody.appendChild(row);
+      });
+
+      // Update merge/split selects
+      const merge1 = document.getElementById("mergeAgent1");
+      const merge2 = document.getElementById("mergeAgent2");
+      const split = document.getElementById("splitAgent");
+      [merge1, merge2, split].forEach(sel => {
+        sel.innerHTML = "";
+        agents.forEach((agent, i) => {
+          const opt = document.createElement("option");
+          opt.value = i;
+          opt.textContent = agent.name;
+          sel.appendChild(opt.cloneNode(true));
+        });
       });
     }
 
@@ -517,6 +557,69 @@
       };
       reader.readAsText(file);
     }
+
+    // Gộp hai đoàn thành một
+    function mergeAgents() {
+      const idx1 = parseInt(document.getElementById("mergeAgent1").value);
+      const idx2 = parseInt(document.getElementById("mergeAgent2").value);
+      if (isNaN(idx1) || isNaN(idx2) || idx1 === idx2) {
+        alert("Chọn hai đoàn khác nhau để gộp.");
+        return;
+      }
+      const agent1 = agents[idx1];
+      const agent2 = agents[idx2];
+      const mergedAgent = {
+        name: agent1.name + " + " + agent2.name,
+        color: agent1.color,
+        time: agent1.time,
+        route: [...agent1.route, ...agent2.route]
+      };
+      if (idx1 > idx2) {
+        agents.splice(idx1, 1);
+        agents.splice(idx2, 1);
+      } else {
+        agents.splice(idx2, 1);
+        agents.splice(idx1, 1);
+      }
+      agents.push(mergedAgent);
+      updateAgentTable();
+    }
+
+    // Tách một đoàn thành hai đoàn
+    function splitAgent() {
+      const idx = parseInt(document.getElementById("splitAgent").value);
+      const splitIdx = parseInt(document.getElementById("splitIndex").value);
+      if (isNaN(idx) || isNaN(splitIdx)) {
+        alert("Chọn đoàn và vị trí tách.");
+        return;
+      }
+      const agent = agents[idx];
+      if (splitIdx < 1 || splitIdx >= agent.route.length) {
+        alert("Vị trí tách không hợp lệ.");
+        return;
+      }
+      const agentA = {
+        name: agent.name + " (A)",
+        color: agent.color,
+        time: agent.time,
+        route: agent.route.slice(0, splitIdx)
+      };
+      const agentB = {
+        name: agent.name + " (B)",
+        color: agent.color,
+        time: agent.time,
+        route: agent.route.slice(splitIdx)
+      };
+      agents.splice(idx, 1);
+      agents.push(agentA, agentB);
+      updateAgentTable();
+    }
+
+    // Tự động điền tuyến đường khi chọn từ danh sách
+    document.getElementById("predefinedRoutes").addEventListener("change", function() {
+      const selected = Array.from(this.selectedOptions).map(opt => opt.text);
+      document.getElementById("agentRoute").value = selected.join("\n");
+    });
   </script>
 </body>
 </html>
