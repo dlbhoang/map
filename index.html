@@ -1,314 +1,2935 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <title>Quản lý tuyến đường nhiều đoàn</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
-  <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.css" />
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat:400,600&display=swap">
+  <meta charset="utf-8" />
+  <title>Ứng dụng Vẽ Tuyến đường Nâng cao</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+  />
+  <script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+  ></script>
   <style>
-    * { box-sizing: border-box; }
-    body { margin: 0; font-family: "Montserrat", "Segoe UI", sans-serif; background: linear-gradient(135deg, #e0eafc 0%, #cfdef3 100%); color: #333; }
-    .wrapper { display: flex; height: 100vh; }
-    .sidebar { width: 380px; padding: 28px 24px; background: #fff; border-right: 1px solid #e3e6ee; overflow-y: auto; box-shadow: 2px 0 16px rgba(0,0,0,0.04); border-radius: 0 24px 24px 0; transition: box-shadow 0.3s; }
-    .sidebar h2 { margin-top: 0; color: #2b7cff; font-weight: 600; font-size: 2rem; letter-spacing: 1px; margin-bottom: 18px; display: flex; align-items: center; gap: 8px; }
-    .sidebar h2::before { content: "🗺️"; font-size: 1.5rem; }
-    label { font-weight: 500; display: block; margin-top: 14px; color: #2b7cff; letter-spacing: 0.5px; }
-    input, textarea, select { width: 100%; padding: 12px; margin-top: 6px; border: 1.5px solid #e3e6ee; border-radius: 10px; font-size: 15px; background: #f7f9fc; transition: border 0.2s; outline: none; }
-    input:focus, textarea:focus, select:focus { border-color: #2b7cff; background: #eef4ff; }
-    textarea { resize: vertical; min-height: 60px; max-height: 180px; }
-    button { margin-top: 18px; width: 100%; padding: 12px; border: none; border-radius: 10px; font-weight: bold; background: linear-gradient(90deg, #2b7cff 60%, #6bc1ff 100%); color: white; cursor: pointer; font-size: 1rem; box-shadow: 0 2px 8px rgba(43,124,255,0.08); transition: background 0.3s, box-shadow 0.2s, transform 0.2s; letter-spacing: 0.5px; display: flex; align-items: center; justify-content: center; gap: 8px; }
-    button:hover { background: linear-gradient(90deg, #1a5dcc 60%, #4fa3e3 100%); box-shadow: 0 4px 16px rgba(43,124,255,0.12); transform: translateY(-2px) scale(1.01); }
-    button:active { transform: scale(0.98); }
-    .top-controls { display: flex; align-items: center; gap: 10px; margin-top: 22px; }
-    .top-controls select { flex: 1; min-width: 120px; }
-    .agents-table { width: 100%; border-collapse: collapse; margin-top: 24px; background: #f7f9fc; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(43,124,255,0.04); }
-    .agents-table th, .agents-table td { border: none; padding: 10px 8px; text-align: left; font-size: 15px; }
-    .agents-table th { background: #eaf3ff; color: #2b7cff; font-weight: 600; letter-spacing: 0.5px; }
-    .agents-table td div { width: 22px; height: 22px; border-radius: 6px; border: 1.5px solid #e3e6ee; box-shadow: 0 1px 4px rgba(43,124,255,0.08); }
-    .agents-table td button { background: #ff4d4f; color: #fff; border-radius: 6px; padding: 4px 10px; font-size: 1rem; margin: 0; box-shadow: 0 2px 8px rgba(255,77,79,0.12); width: auto; transition: background 0.2s; }
-    .agents-table td button:hover { background: #d9363e; }
-    .agents-table tr:hover { background: #eaf3ff; transition: background 0.2s; }
-    .map-container { flex: 1; position: relative; border-radius: 24px 0 0 24px; overflow: hidden; box-shadow: 0 2px 16px rgba(43,124,255,0.08); margin: 18px 18px 18px 0; background: #e0eafc; }
-    #map { position: absolute; top: 0; left: 0; right: 0; bottom: 0; }
-    input[type="file"] { margin-top: 10px; background: #f7f9fc; border: none; font-size: 15px; color: #2b7cff; }
-    #loading { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(255,255,255,0.7); z-index: 999; align-items: center; justify-content: center; font-size: 2rem; color: #2b7cff; gap: 16px; }
-    @media (max-width: 900px) { .wrapper { flex-direction: column; } .sidebar { width: 100%; height: auto; border-right: none; border-bottom: 1px solid #e3e6ee; border-radius: 0 0 24px 24px; } .map-container { height: 60vh; border-radius: 24px; margin: 18px; } }
-    @media (max-width: 600px) { .sidebar { padding: 16px 8px; border-radius: 0 0 16px 16px; } .map-container { margin: 8px; border-radius: 16px; } button, input, textarea, select { font-size: 0.95rem; padding: 10px; } }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      overflow: hidden;
+      touch-action: manipulation;
+    }
+    
+    #map {
+      height: 100vh;
+      width: 100%;
+    }
+    
+    .control-panel {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      z-index: 1000;
+      background: white;
+      padding: 15px;
+      border-radius: 10px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+      max-width: 300px;
+      max-height: 90vh;
+      overflow-y: auto;
+      transition: all 0.3s ease;
+    }
+    
+    /* Responsive cho điện thoại */
+    @media (max-width: 768px) {
+      .control-panel {
+        max-width: calc(100vw - 20px);
+        max-height: 80vh;
+        padding: 12px;
+        font-size: 14px;
+      }
+      
+      .control-panel h3 {
+        font-size: 16px;
+        margin-bottom: 12px;
+      }
+      
+      .input-group label {
+        font-size: 12px;
+      }
+      
+      .input-group input, .input-group select {
+        padding: 10px;
+        font-size: 14px;
+      }
+      
+      .btn {
+        padding: 10px 8px;
+        font-size: 11px;
+        min-width: 70px;
+      }
+      
+      .button-group {
+        gap: 3px;
+        margin: 8px 0;
+      }
+      
+      .map-style-selector {
+        top: 5px;
+        right: 5px;
+        padding: 8px;
+      }
+      
+      .map-style-selector select {
+        font-size: 12px;
+        padding: 6px;
+      }
+      
+      .legend {
+        bottom: 60px;
+        right: 10px;
+        max-width: 200px;
+        padding: 8px;
+      }
+      
+      .status-bar {
+        bottom: 5px;
+        right: 5px;
+        max-width: calc(100vw - 20px);
+        font-size: 11px;
+        padding: 6px 10px;
+      }
+    }
+    
+    /* Ẩn control panel trên điện thoại khi không cần thiết */
+    .control-panel.collapsed {
+      transform: translateX(-100%);
+      opacity: 0;
+    }
+    
+    .control-panel h3 {
+      margin-bottom: 15px;
+      color: #333;
+      border-bottom: 2px solid #007cbf;
+      padding-bottom: 5px;
+    }
+    
+    .input-group {
+      margin: 10px 0;
+    }
+    
+    .input-group label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 5px;
+      color: #555;
+    }
+    
+    .input-group input, .input-group select {
+      width: 100%;
+      padding: 8px;
+      border: 2px solid #ddd;
+      border-radius: 5px;
+      font-size: 13px;
+      transition: border-color 0.3s;
+    }
+    
+    .input-group input:focus, .input-group select:focus {
+      outline: none;
+      border-color: #007cbf;
+    }
+    
+    .button-group {
+      display: flex;
+      gap: 5px;
+      flex-wrap: wrap;
+      margin: 10px 0;
+    }
+    
+    .btn {
+      padding: 8px 12px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
+      transition: all 0.3s;
+      flex: 1;
+      min-width: 80px;
+      touch-action: manipulation;
+    }
+    
+    .btn-primary {
+      background: #007cbf;
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      background: #005a8b;
+      transform: translateY(-1px);
+    }
+    
+    .btn-success {
+      background: #28a745;
+      color: white;
+    }
+    
+    .btn-success:hover {
+      background: #1e7e34;
+      transform: translateY(-1px);
+    }
+    
+    .btn-danger {
+      background: #dc3545;
+      color: white;
+    }
+    
+    .btn-danger:hover {
+      background: #c82333;
+      transform: translateY(-1px);
+    }
+    
+    .btn-warning {
+      background: #ffc107;
+      color: #212529;
+    }
+    
+    .btn-warning:hover {
+      background: #e0a800;
+      transform: translateY(-1px);
+    }
+    
+    .btn-info {
+      background: #17a2b8;
+      color: white;
+    }
+    
+    .btn-info:hover {
+      background: #138496;
+      transform: translateY(-1px);
+    }
+    
+    .btn.active {
+      box-shadow: 0 0 0 2px rgba(0,124,191,0.3);
+    }
+    
+    .route-info {
+      background: #f8f9fa;
+      padding: 10px;
+      border-radius: 5px;
+      margin: 10px 0;
+      border-left: 4px solid #007cbf;
+    }
+    
+    .route-info h4 {
+      margin-bottom: 5px;
+      color: #333;
+    }
+    
+    .route-info p {
+      margin: 3px 0;
+      font-size: 12px;
+      color: #666;
+    }
+    
+    .map-style-selector {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      z-index: 1000;
+      background: white;
+      padding: 10px;
+      border-radius: 5px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    .legend {
+      position: absolute;
+      bottom: 80px;
+      right: 20px;
+      z-index: 1000;
+      background: white;
+      padding: 10px;
+      border-radius: 5px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      max-width: 250px;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+    
+    .legend-item {
+      display: flex;
+      align-items: center;
+      margin: 5px 0;
+      font-size: 12px;
+    }
+    
+    .legend-color {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      margin-right: 8px;
+      border: 2px solid #333;
+    }
+    
+    /* CSS cho label động */
+    .label-icon {
+      pointer-events: none;
+    }
+    
+    .label-icon div {
+      pointer-events: auto;
+      transition: all 0.3s ease;
+    }
+    
+    .label-icon div:hover {
+      transform: scale(1.05) !important;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.5) !important;
+    }
+    
+    .status-bar {
+      position: absolute;
+      bottom: 10px;
+      right: 10px;
+      z-index: 1000;
+      background: rgba(0,0,0,0.8);
+      color: white;
+      padding: 8px 12px;
+      border-radius: 5px;
+      font-size: 12px;
+      max-width: 300px;
+      word-wrap: break-word;
+    }
+    
+    /* Biểu tượng phương tiện di chuyển */
+    .vehicle-marker {
+      position: absolute;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border: 3px solid white;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 18px;
+      font-weight: bold;
+      z-index: 1001;
+      transition: all 0.3s ease;
+      animation: vehicleBounce 1s infinite alternate;
+    }
+    
+    /* Icon cho từng loại phương tiện */
+    .vehicle-person {
+      background: linear-gradient(135deg, #4CAF50, #45a049);
+    }
+    
+    .vehicle-car {
+      background: linear-gradient(135deg, #2196F3, #1976D2);
+    }
+    
+    .vehicle-motorcycle {
+      background: linear-gradient(135deg, #FF9800, #F57C00);
+    }
+    
+    .vehicle-bicycle {
+      background: linear-gradient(135deg, #9C27B0, #7B1FA2);
+    }
+    
+    .vehicle-bus {
+      background: linear-gradient(135deg, #FF5722, #D84315);
+    }
+    
+    .vehicle-truck {
+      background: linear-gradient(135deg, #607D8B, #455A64);
+    }
+    
+    .vehicle-ambulance {
+      background: linear-gradient(135deg, #F44336, #D32F2F);
+      animation: ambulanceFlash 1s infinite alternate;
+    }
+    
+    .vehicle-police {
+      background: linear-gradient(135deg, #3F51B5, #303F9F);
+      animation: policeFlash 1s infinite alternate;
+    }
+    
+    /* Hiệu ứng đặc biệt cho xe cứu thương */
+    @keyframes ambulanceFlash {
+      0% { 
+        background: linear-gradient(135deg, #F44336, #D32F2F);
+        box-shadow: 0 4px 12px rgba(244, 67, 54, 0.5);
+      }
+      100% { 
+        background: linear-gradient(135deg, #FF9800, #F57C00);
+        box-shadow: 0 4px 12px rgba(255, 152, 0, 0.5);
+      }
+    }
+    
+    /* Hiệu ứng đặc biệt cho xe cảnh sát */
+    @keyframes policeFlash {
+      0% { 
+        background: linear-gradient(135deg, #3F51B5, #303F9F);
+        box-shadow: 0 4px 12px rgba(63, 81, 181, 0.5);
+      }
+      100% { 
+        background: linear-gradient(135deg, #F44336, #D32F2F);
+        box-shadow: 0 4px 12px rgba(244, 67, 54, 0.5);
+      }
+    }
+    
+    /* Hiệu ứng bounce cho tất cả phương tiện */
+    @keyframes vehicleBounce {
+      0% { transform: translateY(0px) scale(1); }
+      100% { transform: translateY(-3px) scale(1.05); }
+    }
+    
+    /* Hiệu ứng di chuyển */
+    .vehicle-moving {
+      animation: vehicleMove 0.5s ease-in-out;
+    }
+    
+    @keyframes vehicleMove {
+      0% { transform: scale(1) rotate(0deg); }
+      50% { transform: scale(1.1) rotate(5deg); }
+      100% { transform: scale(1) rotate(0deg); }
+    }
+    
+    /* Chế độ giao thông */
+    .traffic-mode .vehicle-marker {
+      box-shadow: 0 4px 12px rgba(255, 193, 7, 0.6);
+    }
+    
+    /* Chế độ ban đêm */
+    .night-mode .vehicle-marker {
+      box-shadow: 0 4px 12px rgba(255, 255, 255, 0.3);
+      filter: brightness(1.2);
+    }
+    
+    /* Hiệu ứng đổ bóng cho phương tiện */
+    .vehicle-shadow {
+      position: absolute;
+      bottom: -12px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 24px;
+      height: 6px;
+      background: rgba(0,0,0,0.3);
+      border-radius: 50%;
+      animation: shadowMove 1s infinite alternate;
+    }
+    
+    @keyframes shadowMove {
+      0% { transform: translateX(-50%) scaleX(1); }
+      100% { transform: translateX(-50%) scaleX(0.8); }
+    }
+    
+    /* Biểu tượng người di chuyển (giữ lại cho tương thích) */
+    .person-marker {
+      position: absolute;
+      width: 30px;
+      height: 30px;
+      background: linear-gradient(135deg, #4CAF50, #45a049);
+      border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+      border: 3px solid white;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 16px;
+      font-weight: bold;
+      z-index: 1001;
+      transition: all 0.3s ease;
+      animation: personBounce 1s infinite alternate;
+    }
+    
+    .person-marker::before {
+      content: '';
+      position: absolute;
+      top: -8px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0;
+      height: 0;
+      border-left: 6px solid transparent;
+      border-right: 6px solid transparent;
+      border-bottom: 8px solid #4CAF50;
+    }
+    
+    .person-marker::after {
+      content: '';
+      position: absolute;
+      bottom: -8px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 12px;
+      height: 4px;
+      background: rgba(0,0,0,0.2);
+      border-radius: 50%;
+    }
+    
+    @keyframes personBounce {
+      0% { transform: translateY(0px); }
+      100% { transform: translateY(-3px); }
+    }
+    
+    /* Nút toggle control panel cho điện thoại */
+    .toggle-controls {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      z-index: 1002;
+      background: #007cbf;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      font-size: 20px;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+    }
+    
+    @media (max-width: 768px) {
+      .toggle-controls {
+        display: flex;
+      }
+      
+      .control-panel {
+        left: -320px;
+      }
+      
+      .control-panel.show {
+        left: 10px;
+      }
+    }
+    
+    /* Animation cho người di chuyển */
+    .person-walking {
+      animation: personWalk 2s infinite;
+    }
+    
+    @keyframes personWalk {
+      0%, 100% { transform: translateY(0px) rotate(0deg); }
+      25% { transform: translateY(-2px) rotate(2deg); }
+      75% { transform: translateY(-2px) rotate(-2deg); }
+    }
+    
+    /* Hiệu ứng đổ bóng cho người */
+    .person-shadow {
+      position: absolute;
+      bottom: -12px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 20px;
+      height: 6px;
+      background: rgba(0,0,0,0.3);
+      border-radius: 50%;
+      animation: shadowMove 1s infinite alternate;
+    }
+    
+    @keyframes shadowMove {
+      0% { transform: translateX(-50%) scaleX(1); }
+      100% { transform: translateX(-50%) scaleX(0.8); }
+    }
   </style>
 </head>
 <body>
-  <div id="loading">
-    <img src="https://cdn-icons-png.flaticon.com/512/833/833472.png" style="width:48px;margin-right:12px;"> Đang tải dữ liệu...
+  <div id="map"></div>
+  
+  <!-- Nút toggle controls cho điện thoại -->
+  <button class="toggle-controls" onclick="toggleControlPanel()" id="toggleBtn">
+    ☰
+  </button>
+  
+  <!-- Panel điều khiển chính -->
+  <div class="control-panel" id="controlPanel">
+    <h3>🎯 Vẽ Tuyến đường</h3>
+    
+    <div class="input-group">
+      <label>Điểm bắt đầu:</label>
+      <input type="text" id="startPoint" placeholder="Nhập tên điểm bắt đầu">
+    </div>
+    
+    <div class="input-group">
+      <label>Điểm kết thúc:</label>
+      <input type="text" id="endPoint" placeholder="Nhập tên điểm kết thúc">
+    </div>
+    
+    <div class="input-group">
+      <label>Tên khối:</label>
+      <input type="text" id="blockName" placeholder="Nhập tên khối (tùy chọn)">
+    </div>
+    
+    <div class="input-group">
+      <label>Loại tuyến đường:</label>
+      <select id="routeType">
+        <option value="driving">🚗 Đường bộ</option>
+        <option value="walking">🚶 Đi bộ</option>
+        <option value="cycling">🚴 Xe đạp</option>
+        <option value="custom">✏️ Tùy chỉnh</option>
+      </select>
+    </div>
+    
+    <div class="input-group">
+      <label>Màu tuyến đường:</label>
+      <input type="color" id="routeColor" value="#ff6b6b" onchange="changeTrailColor()" style="width: 100%; height: 40px; border: 2px solid #ddd; border-radius: 5px; cursor: pointer;">
+    </div>
+    
+    <div class="button-group">
+      <button id="drawBtn" class="btn btn-primary" onclick="toggleDrawMode()">🎨 Vẽ đường</button>
+      <button id="clearBtn" class="btn btn-danger" onclick="clearRoute()">🗑️ Xóa</button>
+    </div>
+    
+    <div class="button-group">
+      <button class="btn btn-success" onclick="completeRoute()">✅ Hoàn thành tuyến</button>
+      <button class="btn btn-warning" onclick="editRoute()">✏️ Chỉnh sửa</button>
+    </div>
+    
+    <div class="button-group">
+      <button class="btn btn-info" onclick="showRouteStats()">📊 Thống kê tuyến</button>
+      <button class="btn btn-primary" onclick="optimizeRoute()">🚀 Tối ưu tuyến</button>
+    </div>
+    
+    <div class="button-group">
+      <button class="btn btn-success" onclick="showAllRoutes()">🗺️ Hiển thị tất cả tuyến</button>
+      <button class="btn btn-warning" onclick="hideAllRoutes()">🙈 Ẩn tất cả tuyến</button>
+    </div>
+    
+    <div class="button-group">
+      <button class="btn btn-info" onclick="showRoutesOverview()">📊 Tổng quan tuyến đường</button>
+      <button class="btn btn-primary" onclick="compareRoutes()">⚖️ So sánh tuyến</button>
+    </div>
+    
+    <div class="button-group">
+      <button class="btn btn-success" onclick="exportRoute()">💾 Xuất</button>
+      <button class="btn btn-warning" onclick="importRoute()">📂 Nhập</button>
+    </div>
+    
+    <div class="button-group">
+      <button class="btn btn-primary" onclick="saveCurrentRoute()">💾 Lưu tuyến hiện tại</button>
+      <button class="btn btn-info" onclick="exportRoutesToJSON()">📄 Xuất JSON</button>
+    </div>
+    
+    <div class="button-group">
+      <button class="btn btn-danger" onclick="clearAllRoutes()">🗑️ Xóa tất cả</button>
+    </div>
+    
+    <div class="input-group">
+      <label>Chọn tuyến đường:</label>
+      <select id="routeSelector" onchange="switchRoute()">
+        <option value="-1">-- Chọn tuyến đường --</option>
+      </select>
+    </div>
+    
+    <div class="button-group">
+      <button class="btn btn-primary" onclick="checkNearbyTargets()">🔍 Tìm mục tiêu gần</button>
+    </div>
+    
+    <div class="button-group">
+      <button class="btn btn-success" onclick="showAllTargets()">🏢 Hiển thị tất cả mục tiêu</button>
+      <button class="btn btn-warning" onclick="hideAllTargets()">🙈 Ẩn mục tiêu</button>
+    </div>
+    
+    <div class="button-group">
+      <button class="btn btn-primary" onclick="toggleStreetView()" id="streetViewBtn">🛣️ Hiển thị đường phố rõ ràng</button>
+    </div>
+    
+    <div class="button-group">
+      <button class="btn btn-info" onclick="toggleAutoShowTargets()" id="autoShowBtn">🔍 Tự động hiển thị mục tiêu</button>
+    </div>
+    
+    <div class="button-group">
+      <button class="btn btn-primary" onclick="showTargetsOverview()">📊 Tổng quan mục tiêu</button>
+    </div>
+    
+    <div class="button-group">
+      <button class="btn btn-info" onclick="fitToOverview()">🌍 Xem tổng quan</button>
+      <button class="btn btn-warning" onclick="fitToRoute()">🎯 Xem tuyến đường</button>
+    </div>
+    
+    <div class="button-group">
+      <button class="btn btn-success" onclick="toggleDetailView()" id="detailViewBtn">🔍 Chế độ chi tiết</button>
+    </div>
+    
+    <div class="button-group">
+      <button class="btn btn-secondary" onclick="resetView()">🏠 Reset view</button>
+    </div>
+    
+    <!-- Nút mới cho biểu tượng người di chuyển -->
+    <div class="button-group">
+      <button class="btn btn-info" onclick="togglePersonAnimation()" id="personBtn">👥 Hiển thị người di chuyển</button>
+    </div>
+    
+    <div class="button-group">
+      <button class="btn btn-warning" onclick="startPersonAnimation()" id="startPersonBtn">▶️ Bắt đầu di chuyển</button>
+      <button class="btn btn-danger" onclick="stopPersonAnimation()" id="stopPersonBtn">⏹️ Dừng di chuyển</button>
+    </div>
+    
+    <!-- Tùy chọn cho người vẽ đường -->
+    <div class="input-group">
+      <label>Tốc độ di chuyển:</label>
+      <select id="animationSpeed" onchange="changeAnimationSpeed()">
+        <option value="slow">🐌 Chậm (2s/điểm)</option>
+        <option value="normal" selected>🚶 Bình thường (1s/điểm)</option>
+        <option value="fast">🏃 Nhanh (0.5s/điểm)</option>
+        <option value="very-fast">⚡ Rất nhanh (0.2s/điểm)</option>
+      </select>
+    </div>
+    
+    <div class="input-group">
+      <label>Độ rộng vệt:</label>
+      <input type="range" id="trailWidth" min="2" max="10" value="4" onchange="changeTrailWidth()" style="width: 100%;">
+      <span id="trailWidthValue">4px</span>
+    </div>
+    
+    <div class="button-group">
+      <button class="btn btn-success" onclick="saveTrailAsRoute()" id="saveTrailBtn">💾 Lưu vệt</button>
+      <button class="btn btn-danger" onclick="clearTrail()" id="clearTrailBtn">🗑️ Xóa vệt</button>
+    </div>
+    
+    <div class="button-group">
+      <button class="btn btn-warning" onclick="resetPersonPosition()" id="resetBtn">🔄 Reset vị trí</button>
+      <button class="btn btn-primary" onclick="showTrailInfo()" id="infoBtn">ℹ️ Thông tin vệt</button>
+    </div>
+    
+    <div class="route-info" id="routeInfo" style="display: none;">
+      <h4>📊 Thông tin tuyến đường</h4>
+      <p id="routeDistance">Khoảng cách: --</p>
+      <p id="routeDuration">Thời gian: --</p>
+      <p id="routePoints">Số điểm: --</p>
+    </div>
+    
+    <div class="route-info" id="nearbyInfo" style="display: none;">
+      <h4>🎯 Mục tiêu gần tuyến đường</h4>
+      <div id="nearbyList"></div>
+    </div>
+    
+    <div class="route-info" id="routesList" style="display: none;">
+      <h4>🗺️ Danh sách tuyến đường</h4>
+      <div id="routesListContent"></div>
+    </div>
   </div>
-  <div class="wrapper">
-    <div class="sidebar">
-      <h2>Quản lý tuyến đường</h2>
-      <label>Tên đoàn:</label>
-      <input id="agentName" placeholder="VD: Đoàn A">
-      <label>Màu tuyến:</label>
-      <input id="agentColor" type="color" value="#2b7cff">
-      <label>Thời gian xuất phát:</label>
-      <input id="agentTime" type="time" value="07:00">
-      <label>Tuyến đường (mỗi dòng 1 địa điểm):</label>
-      <textarea id="agentRoute" placeholder="VD:\nBộ Công an, 44 Yết Kiêu\nBộ Công an, 47 Phạm Văn Đồng"></textarea>
-      <button onclick="addAgent()">
-        <img src="https://cdn-icons-png.flaticon.com/512/992/992651.png" style="width:20px;vertical-align:middle;"> Thêm đoàn
-      </button>
-      <div class="top-controls">
-        <select id="distanceSelect">
-          <option value="1">Bán kính: 1 km</option>
-          <option value="3" selected>3 km</option>
-          <option value="5">5 km</option>
-          <option value="10">10 km</option>
-        </select>
-        <button onclick="showAllRoutes()">
-          <img src="https://cdn-icons-png.flaticon.com/512/684/684908.png" style="width:20px;vertical-align:middle;"> Vẽ tuyến
-        </button>
+  
+  <!-- Chọn kiểu bản đồ -->
+  <div class="map-style-selector">
+    <select id="mapStyle" onchange="changeMapStyle()">
+      <option value="osm">🗺️ OpenStreetMap</option>
+      <option value="satellite">🛰️ Vệ tinh</option>
+      <option value="terrain">🏔️ Địa hình</option>
+      <option value="dark">🌙 Tối</option>
+    </select>
+  </div>
+  
+  <!-- Chú thích -->
+  <div class="legend" id="legend">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+      <h4 style="margin: 0;">📋 Chú thích</h4>
+      <button onclick="toggleLegend()" style="background: none; border: none; cursor: pointer; font-size: 16px; color: #666;">👁️</button>
+    </div>
+    <div id="legendContent">
+      <div class="legend-item">
+        <div class="legend-color" style="background: #28a745;"></div>
+        <span>Điểm bắt đầu</span>
       </div>
-      <button onclick="saveAgents()">
-        <img src="https://cdn-icons-png.flaticon.com/512/1828/1828926.png" style="width:20px;vertical-align:middle;"> Lưu JSON
-      </button>
-      <input type="file" onchange="loadAgents(event)">
-      <table class="agents-table" id="agentTable">
-        <thead>
-          <tr>
-            <th>Đoàn</th><th>Màu</th><th>Giờ</th><th>Điểm</th><th>Xoá</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-    </div>
-    <div class="map-container">
-      <div id="map"></div>
+      <div class="legend-item">
+        <div class="legend-color" style="background: #dc3545;"></div>
+        <span>Điểm kết thúc</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-color" style="background: #007cbf;"></div>
+        <span>Điểm trung gian</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-color" style="background: #ffc107;"></div>
+        <span>Tuyến đường</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-color" style="background: #dc3545; width: 36px; height: 36px; border: 4px solid white; position: relative;">
+          <div style="position: absolute; top: -4px; right: -4px; background: #dc3545; color: white; width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; border: 2px solid white; box-shadow: 0 2px 6px rgba(0,0,0,0.3);">1</div>
+        </div>
+        <span>Mục tiêu (🎯)</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-color" style="background: #4CAF50; width: 40px; height: 40px; border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%; border: 4px solid white; display: flex; align-items: center; justify-content: center; color: white; font-size: 18px; font-weight: bold;">👥</div>
+        <span>Người vẽ đường</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-color" style="background: #ff6b6b; width: 36px; height: 4px; border-radius: 2px;"></div>
+        <span>Vệt di chuyển</span>
+      </div>
     </div>
   </div>
-  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-  <script src="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.js"></script>
+  
+  <!-- Thanh trạng thái -->
+  <div class="status-bar" id="statusBar">
+    Sẵn sàng vẽ tuyến đường
+  </div>
+  
   <script>
-    let agents = [];
-    const map = L.map("map").setView([21.028511, 105.804817], 12); // Hà Nội
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      attribution: '&copy; OpenStreetMap',
-      maxZoom: 19
-    }).addTo(map);
-
-    async function geocodeAddress(address) {
-      const fullAddress = address.includes("Hà Nội") ? address : address + ", Hà Nội";
-      const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(fullAddress)}`);
-      const data = await res.json();
-      if (data.length > 0) return [parseFloat(data[0].lat), parseFloat(data[0].lon)];
-      return null;
+    // Khởi tạo bản đồ
+    const map = L.map('map').setView([21.0365, 105.8341], 15);
+    
+    // Các layer bản đồ
+    const mapLayers = {
+      osm: L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors'
+      }),
+      satellite: L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+        attribution: '&copy; Esri'
+      }),
+      terrain: L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenTopoMap'
+      }),
+      dark: L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+        attribution: '&copy; CARTO'
+      })
+    };
+    
+    // Thêm layer mặc định
+    mapLayers.osm.addTo(map);
+    
+    // Biến quản lý
+    let isDrawingMode = false;
+    let currentRoute = [];
+    let routePolyline = null;
+    let startMarker = null;
+    let endMarker = null;
+    let routeMarkers = [];
+    let currentMapStyle = 'osm';
+    let targetMarkers = []; // Mảng lưu các marker mục tiêu
+    let nearbyTargetMarkers = []; // Mảng lưu các marker mục tiêu gần
+    let allRoutes = []; // Mảng lưu tất cả tuyến đường
+    let currentRouteIndex = -1; // Index của tuyến đường hiện tại
+    let autoShowTargets = true; // Chế độ tự động hiển thị mục tiêu
+    let detailViewMode = false; // Chế độ xem chi tiết
+    let streetViewMode = true; // Chế độ hiển thị đường phố rõ ràng
+    let allRoutesVisible = false; // Trạng thái hiển thị tất cả tuyến đường
+    let allRoutePolylines = []; // Mảng lưu tất cả polyline của tuyến đường
+    
+    // Biến cho biểu tượng người di chuyển tạo vệt
+    let personMarker = null; // Biểu tượng người di chuyển
+    let personTrail = []; // Mảng lưu vệt di chuyển
+    let trailPolyline = null; // Đường vệt
+    let isPersonMoving = false; // Trạng thái di chuyển
+    let personSpeed = 1000; // Tốc độ di chuyển (ms)
+    let trailColor = '#ff6b6b'; // Màu vệt
+    let trailWidth = 4; // Độ rộng vệt
+    
+    // Biến cho biểu tượng người di chuyển (giữ lại cho tương thích)
+    let personMarkers = []; // Mảng lưu các biểu tượng người
+    let personAnimationInterval = null; // Interval cho animation
+    let isPersonVisible = false; // Trạng thái hiển thị người
+    let isPersonAnimating = false; // Trạng thái animation
+    let personCurrentIndex = 0; // Index hiện tại của người trên tuyến đường
+    
+    // Danh sách các mục tiêu với tọa độ ước tính
+    const targets = [
+      { name: "44 Yết Kiêu", coords: [21.021515632015056, 105.84222636688743] },
+      { name: "112 Đường Lê Duẩn", coords: [21.026203526657927, 105.8412553380519] },
+      { name: "30 Trần Bình Trọng", coords: [21.017840721169478, 105.84318036688747] },
+      { name: "15 P. Trần Bình Trọng", coords: [21.02162599462683, 105.84518209757319] },
+      { name: "3 P. Nguyễn Thượng Hiền", coords: [21.01892983496959, 105.84357365154449] },
+      { name: "44-46 P. Trần Phú", coords: [21.031668790998804, 105.8379764092163] },
+      { name: "39 Đặng Vũ Hỷ", coords: [21.075067590622364, 105.8971477332735] },
+      { name: "1 Phạm Ngũ Lão", coords: [21.02456812852695, 105.85929738408043] },
+      { name: "25 P. Tông Đản", coords: [21.026245350554248, 105.85821674760925] },
+      { name: "54 Trần Hưng Đạo", coords: [21.02264096812682, 105.85131514759998] },
+      { name: "48 P. Lý Thường Kiệt", coords: [21.024628845190524, 105.84737559387327] },
+      { name: "22 Hùng Vương", coords: [21.03316617476555, 105.8338170938735] },
+      { name: "80 P. Trần Quốc Hoàn", coords: [21.042058921947994, 105.785464882231] },
+      { name: "Số 1A Quan Hoa", coords: [21.031703434718168, 105.80224451600377] }, 
+      { name: "1150 Đ. Láng", coords: [21.025956983443567, 105.79860915339471] },
+      { name: "280b Đ. Lạc Long Quân", coords: [21.06371871535174, 105.80934036688865] },
+      { name: "47 Đ. Phạm Văn Đồng", coords: [21.048594769824994, 105.78006190921685] },
+      { name: "Số 30 Đ. Phạm Văn Đồng", coords: [21.044034739150565, 105.78153460921662] },
+      { name: "32 P. Cát Linh", coords: [21.029802493759302, 105.83092955154483] },
+      { name: "49 P. Lý Thái Tổ", coords: [21.02733341013021, 105.85657972270901] },
+      { name: "28 Trần Hưng Đạo", coords: [21.02132739054037, 105.85537703225303] },
+      { name: "504 P. Xã Đàn", coords: [21.017838625651773, 105.83084985339453] },
+    ];    
+    
+    // Hàm toggle control panel cho điện thoại
+    function toggleControlPanel() {
+      const panel = document.getElementById('controlPanel');
+      const toggleBtn = document.getElementById('toggleBtn');
+      
+      if (panel.classList.contains('show')) {
+        panel.classList.remove('show');
+        toggleBtn.textContent = '☰';
+        toggleBtn.style.background = '#007cbf';
+      } else {
+        panel.classList.add('show');
+        toggleBtn.textContent = '✕';
+        toggleBtn.style.background = '#dc3545';
+      }
     }
-
-    function haversineDistance(lat1, lon1, lat2, lon2) {
-      const toRad = deg => deg * Math.PI / 180;
-      const R = 6371;
-      const dLat = toRad(lat2 - lat1), dLon = toRad(lon2 - lon1);
-      const a = Math.sin(dLat/2)**2 + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon/2)**2;
-      return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    }
-
-    function updateAgentTable() {
-      const tbody = document.querySelector("#agentTable tbody");
-      tbody.innerHTML = "";
-      agents.forEach((agent, index) => {
-        const row = document.createElement("tr");
-        row.innerHTML = `
-          <td>${agent.name}</td>
-          <td><div style="background:${agent.color}"></div></td>
-          <td>${agent.time}</td>
-          <td>${agent.route.length}</td>
-          <td><button onclick="removeAgent(${index})">❌</button></td>
-        `;
-        tbody.appendChild(row);
+    
+    // Hàm tạo biểu tượng người di chuyển tạo vệt
+    function createPersonMarker(coords) {
+      const personIcon = L.divIcon({
+        className: 'person-marker',
+        html: `
+          <div style="position: relative;">
+            <div style="background: linear-gradient(135deg, #4CAF50, #45a049); width: 40px; height: 40px; border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%; border: 4px solid white; box-shadow: 0 6px 16px rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; color: white; font-size: 20px; font-weight: bold; position: relative; z-index: 1002;">
+              <div style="font-size: 18px;">👥</div>
+              <div style="position: absolute; top: -10px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 8px solid transparent; border-right: 8px solid transparent; border-bottom: 10px solid #4CAF50;"></div>
+              <div style="position: absolute; bottom: -10px; left: 50%; transform: translateX(-50%); width: 16px; height: 6px; background: rgba(0,0,0,0.3); border-radius: 50%;"></div>
+            </div>
+            <div style="position: absolute; top: -25px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.9); color: white; padding: 4px 10px; border-radius: 5px; font-size: 12px; white-space: nowrap; border: 2px solid rgba(255,255,255,0.3); font-weight: bold;">
+              👤 Người vẽ đường
+            </div>
+          </div>
+        `,
+        iconSize: [40, 40],
+        iconAnchor: [20, 20]
       });
+      
+      const marker = L.marker(coords, { icon: personIcon, draggable: true }).addTo(map);
+      
+      // Thêm popup cho người
+      marker.bindPopup(`
+        <div style="min-width: 250px; padding: 10px;">
+          <h4 style="margin: 0 0 10px 0; color: #4CAF50; font-size: 16px; border-bottom: 2px solid #4CAF50; padding-bottom: 5px;">
+            👤 Người vẽ đường
+          </h4>
+          <p style="margin: 8px 0; font-size: 13px;"><strong>📍 Vị trí:</strong> ${coords[0].toFixed(6)}, ${coords[1].toFixed(6)}</p>
+          <p style="margin: 8px 0; font-size: 13px;"><strong>🚦 Trạng thái:</strong> ${isPersonMoving ? 'Đang di chuyển' : 'Đứng yên'}</p>
+          <p style="margin: 8px 0; font-size: 13px;"><strong>📏 Độ dài vệt:</strong> ${personTrail.length} điểm</p>
+          <p style="margin: 8px 0; font-size: 13px;"><strong>🎨 Màu vệt:</strong> <span style="color: ${trailColor}; font-weight: bold;">${trailColor}</span></p>
+          <div style="margin-top: 12px; padding: 10px; background: #e8f5e8; border-radius: 5px; font-size: 12px; color: #2e7d32; border-left: 4px solid #4CAF50;">
+            <strong>💡 Hướng dẫn:</strong><br>
+            • Kéo biểu tượng để di chuyển<br>
+            • Vệt sẽ được tạo theo đường đi<br>
+            • Sử dụng nút "▶️ Bắt đầu di chuyển" để tự động
+          </div>
+        </div>
+      `);
+      
+      // Thêm event listener cho drag
+      marker.on('drag', function(e) {
+        const newCoords = e.target.getLatLng();
+        addTrailPoint(newCoords);
+        updateTrail();
+      });
+      
+      return marker;
     }
-
-    function addAgent() {
-      const name = document.getElementById("agentName").value.trim();
-      const color = document.getElementById("agentColor").value;
-      const time = document.getElementById("agentTime").value;
-      const route = document.getElementById("agentRoute").value.trim().split("\n").filter(x => x);
-
-      if (!name || route.length < 2) {
-        alert("Nhập ít nhất 2 địa điểm.");
+    
+    // Hàm thêm điểm vào vệt
+    function addTrailPoint(coords) {
+      personTrail.push([coords.lat, coords.lng]);
+      updateTrail();
+    }
+    
+    // Hàm cập nhật vệt
+    function updateTrail() {
+      if (trailPolyline) {
+        map.removeLayer(trailPolyline);
+      }
+      
+      if (personTrail.length >= 2) {
+        trailPolyline = L.polyline(personTrail, {
+          color: trailColor,
+          weight: trailWidth,
+          opacity: 0.8,
+          smoothFactor: 1,
+          lineCap: 'round',
+          lineJoin: 'round'
+        }).addTo(map);
+        
+        // Thêm popup cho vệt
+        trailPolyline.bindPopup(`
+          <div style="min-width: 250px; padding: 10px;">
+            <h4 style="margin: 0 0 10px 0; color: ${trailColor}; border-bottom: 2px solid ${trailColor}; padding-bottom: 5px;">
+              🛤️ Vệt di chuyển
+            </h4>
+            <p style="margin: 8px 0; font-size: 13px;"><strong>📏 Độ dài:</strong> ${personTrail.length} điểm</p>
+            <p style="margin: 8px 0; font-size: 13px;"><strong>🎨 Màu sắc:</strong> <span style="color: ${trailColor}; font-weight: bold;">${trailColor}</span></p>
+            <p style="margin: 8px 0; font-size: 13px;"><strong>📐 Độ rộng:</strong> ${trailWidth}px</p>
+            <div style="margin-top: 12px; padding: 10px; background: #f8f9fa; border-radius: 5px; font-size: 12px; color: #666; border-left: 4px solid ${trailColor};">
+              <strong>💡 Thông tin:</strong><br>
+              • Vệt được tạo bởi người di chuyển<br>
+              • Có thể sử dụng làm tuyến đường<br>
+              • Click "💾 Lưu vệt" để lưu tuyến đường
+            </div>
+          </div>
+        `);
+      }
+    }
+    
+    // Hàm tạo biểu tượng người di chuyển (giữ lại cho tương thích)
+    function createPersonMarker(coords, index = 0) {
+      const personIcon = L.divIcon({
+        className: 'person-marker',
+        html: `
+          <div style="position: relative;">
+            <div style="background: linear-gradient(135deg, #4CAF50, #45a049); width: 30px; height: 30px; border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%; border: 3px solid white; box-shadow: 0 4px 12px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; color: white; font-size: 16px; font-weight: bold; position: relative;">
+              <div style="font-size: 14px;">👥</div>
+              <div style="position: absolute; top: -8px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 6px solid transparent; border-right: 6px solid transparent; border-bottom: 8px solid #4CAF50;"></div>
+              <div style="position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%); width: 12px; height: 4px; background: rgba(0,0,0,0.2); border-radius: 50%;"></div>
+            </div>
+            <div style="position: absolute; top: -15px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.8); color: white; padding: 2px 6px; border-radius: 3px; font-size: 10px; white-space: nowrap;">Nhóm ${index + 1}</div>
+          </div>
+        `,
+        iconSize: [30, 30],
+        iconAnchor: [15, 15]
+      });
+      
+      const personMarker = L.marker(coords, { icon: personIcon }).addTo(map);
+      
+      // Thêm popup cho người
+      personMarker.bindPopup(`
+        <div style="min-width: 200px; padding: 8px;">
+          <h4 style="margin: 0 0 8px 0; color: #4CAF50; font-size: 14px; border-bottom: 2px solid #4CAF50; padding-bottom: 5px;">👥 Nhóm ${index + 1}</h4>
+          <p style="margin: 6px 0; font-size: 12px;"><strong>Vị trí:</strong> ${coords[0].toFixed(6)}, ${coords[1].toFixed(6)}</p>
+          <p style="margin: 6px 0; font-size: 12px;"><strong>Trạng thái:</strong> ${isPersonAnimating ? 'Đang di chuyển' : 'Đứng yên'}</p>
+          <p style="margin: 6px 0; font-size: 12px;"><strong>Tiến độ:</strong> ${personCurrentIndex + 1}/${currentRoute.length}</p>
+          <div style="margin-top: 10px; padding: 8px; background: #e8f5e8; border-radius: 4px; font-size: 11px; color: #2e7d32; border-left: 4px solid #4CAF50;">
+            <strong>💡 Thông tin:</strong><br>
+            • Nhóm ${index + 1} người<br>
+            • Đang di chuyển theo tuyến đường<br>
+            • Sử dụng nút "▶️ Bắt đầu di chuyển" để bắt đầu
+          </div>
+        </div>
+      `);
+      
+      return personMarker;
+    }
+    
+    // Hàm hiển thị/ẩn biểu tượng người di chuyển tạo vệt
+    function togglePersonAnimation() {
+      const btn = document.getElementById('personBtn');
+      
+      if (!personMarker) {
+        // Tạo biểu tượng người di chuyển
+        const center = map.getCenter();
+        personMarker = createPersonMarker(center);
+        personTrail = [];
+        
+        btn.textContent = '👤 Ẩn người vẽ đường';
+        btn.classList.remove('btn-info');
+        btn.classList.add('btn-warning');
+        updateStatus('👤 Đã hiển thị người vẽ đường - Kéo để tạo vệt');
+      } else {
+        // Ẩn biểu tượng người và vệt
+        if (personMarker) {
+          map.removeLayer(personMarker);
+          personMarker = null;
+        }
+        
+        if (trailPolyline) {
+          map.removeLayer(trailPolyline);
+          trailPolyline = null;
+        }
+        
+        personTrail = [];
+        
+        btn.textContent = '👤 Hiển thị người vẽ đường';
+        btn.classList.remove('btn-warning');
+        btn.classList.add('btn-info');
+        updateStatus('Đã ẩn người vẽ đường');
+      }
+    }
+    
+    // Hàm bắt đầu animation di chuyển tự động
+    function startPersonAnimation() {
+      if (!personMarker) {
+        alert('Vui lòng hiển thị người vẽ đường trước!');
+        return;
+      }
+      
+      if (isPersonMoving) {
+        alert('Animation đang chạy!');
+        return;
+      }
+      
+      isPersonMoving = true;
+      
+      const startBtn = document.getElementById('startPersonBtn');
+      const stopBtn = document.getElementById('stopPersonBtn');
+      
+      startBtn.disabled = true;
+      startBtn.textContent = '▶️ Đang di chuyển...';
+      stopBtn.disabled = false;
+      
+      // Bắt đầu di chuyển tự động
+      const moveInterval = setInterval(() => {
+        if (!isPersonMoving) {
+          clearInterval(moveInterval);
+          return;
+        }
+        
+        // Di chuyển ngẫu nhiên
+        const currentPos = personMarker.getLatLng();
+        const latOffset = (Math.random() - 0.5) * 0.001; // Khoảng 100m
+        const lngOffset = (Math.random() - 0.5) * 0.001;
+        
+        const newPos = L.latLng(currentPos.lat + latOffset, currentPos.lng + lngOffset);
+        personMarker.setLatLng(newPos);
+        
+        // Thêm điểm vào vệt
+        addTrailPoint(newPos);
+        
+        updateStatus(`👤 Đang di chuyển tự động - Vệt: ${personTrail.length} điểm`);
+      }, personSpeed);
+      
+      updateStatus('▶️ Đã bắt đầu di chuyển tự động');
+    }
+    
+    // Hàm dừng animation di chuyển
+    function stopPersonAnimation() {
+      if (!isPersonMoving) {
+        return;
+      }
+      
+      isPersonMoving = false;
+      
+      const startBtn = document.getElementById('startPersonBtn');
+      const stopBtn = document.getElementById('stopPersonBtn');
+      
+      startBtn.disabled = false;
+      startBtn.textContent = '▶️ Bắt đầu di chuyển';
+      stopBtn.disabled = true;
+      
+      updateStatus('⏹️ Đã dừng di chuyển tự động');
+    }
+    
+    // Hàm thay đổi màu vệt
+    function changeTrailColor() {
+      const colorInput = document.getElementById('routeColor');
+      trailColor = colorInput.value;
+      updateTrail();
+      updateStatus(`Đã thay đổi màu vệt: ${trailColor}`);
+    }
+    
+    // Hàm thay đổi độ rộng vệt
+    function changeTrailWidth() {
+      const widthInput = document.getElementById('trailWidth');
+      const widthValue = document.getElementById('trailWidthValue');
+      trailWidth = parseInt(widthInput.value);
+      widthValue.textContent = `${trailWidth}px`;
+      updateTrail();
+      updateStatus(`Đã thay đổi độ rộng vệt: ${trailWidth}px`);
+    }
+    
+    // Hàm thay đổi tốc độ di chuyển
+    function changeAnimationSpeed() {
+      const speed = document.getElementById('animationSpeed').value;
+      const speeds = {
+        'slow': 2000,
+        'normal': 1000,
+        'fast': 500,
+        'very-fast': 200
+      };
+      personSpeed = speeds[speed];
+      updateStatus(`Đã thay đổi tốc độ: ${speed}`);
+    }
+    
+    // Hàm lưu vệt thành tuyến đường
+    function saveTrailAsRoute() {
+      if (personTrail.length < 2) {
+        alert('Vệt quá ngắn để lưu thành tuyến đường!');
+        return;
+      }
+      
+      // Lưu vệt vào tuyến đường hiện tại
+      currentRoute = [...personTrail];
+      
+      // Vẽ tuyến đường
+      if (routePolyline) {
+        map.removeLayer(routePolyline);
+      }
+      
+      routePolyline = L.polyline(currentRoute, {
+        color: trailColor,
+        weight: trailWidth,
+        opacity: 0.8,
+        smoothFactor: 1
+      }).addTo(map);
+      
+      // Cập nhật thông tin
+      updateRouteInfo();
+      
+      updateStatus(`✅ Đã lưu vệt thành tuyến đường: ${personTrail.length} điểm`);
+    }
+    
+    // Hàm xóa vệt
+    function clearTrail() {
+      if (trailPolyline) {
+        map.removeLayer(trailPolyline);
+        trailPolyline = null;
+      }
+      personTrail = [];
+      updateStatus('🗑️ Đã xóa vệt');
+    }
+    
+    // Hàm reset vị trí người
+    function resetPersonPosition() {
+      if (!personMarker) {
+        alert('Vui lòng hiển thị người vẽ đường trước!');
+        return;
+      }
+      
+      const center = map.getCenter();
+      personMarker.setLatLng(center);
+      updateStatus('🔄 Đã reset vị trí người về trung tâm');
+    }
+    
+    // Hàm hiển thị thông tin vệt
+    function showTrailInfo() {
+      if (!personMarker) {
+        alert('Vui lòng hiển thị người vẽ đường trước!');
+        return;
+      }
+      
+      const infoContent = `
+        <div style="min-width: 300px; padding: 15px;">
+          <h4 style="margin: 0 0 15px 0; color: #4CAF50; border-bottom: 2px solid #4CAF50; padding-bottom: 8px;">
+            👤 Thông tin người vẽ đường
+          </h4>
+          
+          <div style="margin-bottom: 15px; padding: 10px; background: #e8f5e8; border-radius: 5px;">
+            <h5 style="margin: 0 0 10px 0; color: #2e7d32;">👤 Thông tin người</h5>
+            <p style="margin: 5px 0;"><strong>Trạng thái:</strong> ${isPersonMoving ? 'Đang di chuyển' : 'Đứng yên'}</p>
+            <p style="margin: 5px 0;"><strong>Tốc độ:</strong> ${personSpeed}ms/điểm</p>
+            <p style="margin: 5px 0;"><strong>Vị trí:</strong> ${personMarker.getLatLng().lat.toFixed(6)}, ${personMarker.getLatLng().lng.toFixed(6)}</p>
+          </div>
+          
+          <div style="margin-bottom: 15px; padding: 10px; background: #e3f2fd; border-radius: 5px;">
+            <h5 style="margin: 0 0 10px 0; color: #1565c0;">🛤️ Thông tin vệt</h5>
+            <p style="margin: 5px 0;"><strong>Độ dài:</strong> ${personTrail.length} điểm</p>
+            <p style="margin: 5px 0;"><strong>Màu sắc:</strong> <span style="color: ${trailColor}; font-weight: bold;">${trailColor}</span></p>
+            <p style="margin: 5px 0;"><strong>Độ rộng:</strong> ${trailWidth}px</p>
+            <p style="margin: 5px 0;"><strong>Khoảng cách:</strong> ${personTrail.length > 1 ? calculateDistance(personTrail).toFixed(2) : '0'} km</p>
+          </div>
+          
+          <div style="padding: 10px; background: #fff3cd; border-radius: 5px; border-left: 4px solid #ffc107;">
+            <strong>💡 Hướng dẫn:</strong><br>
+            • Kéo biểu tượng để di chuyển thủ công<br>
+            • Sử dụng "▶️ Bắt đầu di chuyển" để tự động<br>
+            • Click "💾 Lưu vệt" để lưu thành tuyến đường<br>
+            • Click "🗑️ Xóa vệt" để xóa vệt hiện tại
+          </div>
+        </div>
+      `;
+      
+      L.popup({
+        maxWidth: 400,
+        maxHeight: 600
+      })
+      .setLatLng(personMarker.getLatLng())
+      .setContent(infoContent)
+      .openOn(map);
+      
+      updateStatus('ℹ️ Đã hiển thị thông tin vệt');
+    }
+    
+    // Hàm thay đổi tốc độ animation
+    function changeAnimationSpeed() {
+      const speed = document.getElementById('animationSpeed').value;
+      const speeds = {
+        'slow': 2000,
+        'normal': 1000,
+        'fast': 500,
+        'very-fast': 200
+      };
+      vehicleSpeed = speeds[speed];
+      
+      if (isVehicleAnimating) {
+        // Restart animation với tốc độ mới
+        stopVehicleAnimation();
+        startPersonAnimation();
+      }
+      
+      updateStatus(`Đã thay đổi tốc độ: ${speed}`);
+    }
+    
+    // Hàm thay đổi số lượng phương tiện
+    function changeVehicleCount() {
+      vehicleCount = parseInt(document.getElementById('vehicleCount').value);
+      if (isVehicleVisible) {
+        // Tạo lại các marker với số lượng mới
+        vehicleMarkers.forEach(marker => map.removeLayer(marker));
+        vehicleMarkers = [];
+        
+        const numVehicles = Math.min(vehicleCount, currentRoute.length);
+        for (let i = 0; i < numVehicles; i++) {
+          const startIndex = Math.floor(i * currentRoute.length / numVehicles);
+          const coords = currentRoute[startIndex];
+          const vehicleMarker = createVehicleMarker(coords, i);
+          vehicleMarkers.push(vehicleMarker);
+        }
+        
+        updateStatus(`Đã thay đổi số lượng: ${numVehicles} phương tiện`);
+      }
+    }
+    
+    // Hàm đảo chiều animation
+    function reverseAnimation() {
+      vehicleDirection = -vehicleDirection;
+      const reverseBtn = document.getElementById('reverseBtn');
+      
+      if (vehicleDirection > 0) {
+        reverseBtn.textContent = '🔄 Đảo chiều';
+        updateStatus('Đã đảo chiều: Tiến');
+      } else {
+        reverseBtn.textContent = '🔄 Đảo chiều (Lùi)';
+        updateStatus('Đã đảo chiều: Lùi');
+      }
+    }
+    
+    // Hàm tạm dừng animation
+    function pauseAnimation() {
+      if (!isVehicleAnimating) {
+        alert('Không có animation đang chạy!');
+        return;
+      }
+      
+      isAnimationPaused = !isAnimationPaused;
+      const pauseBtn = document.getElementById('pauseBtn');
+      
+      if (isAnimationPaused) {
+        pauseBtn.textContent = '▶️ Tiếp tục';
+        updateStatus('⏸️ Đã tạm dừng animation');
+      } else {
+        pauseBtn.textContent = '⏸️ Tạm dừng';
+        updateStatus('▶️ Đã tiếp tục animation');
+      }
+    }
+    
+    // Hàm reset vị trí animation
+    function resetAnimation() {
+      if (!isVehicleVisible) {
+        alert('Vui lòng hiển thị phương tiện trước!');
+        return;
+      }
+      
+      vehicleCurrentIndex = 0;
+      vehicleDirection = 1;
+      
+      // Đặt lại vị trí các phương tiện
+      vehicleMarkers.forEach((marker, index) => {
+        const startIndex = Math.floor(index * currentRoute.length / vehicleMarkers.length);
+        const coords = currentRoute[startIndex];
+        marker.setLatLng(coords);
+      });
+      
+      updateStatus('🔄 Đã reset vị trí phương tiện về đầu tuyến');
+    }
+    
+    // Hàm hiển thị thông tin animation
+    function showAnimationInfo() {
+      if (!isVehicleVisible) {
+        alert('Vui lòng hiển thị phương tiện trước!');
+        return;
+      }
+      
+      const infoContent = `
+        <div style="min-width: 300px; padding: 15px;">
+          <h4 style="margin: 0 0 15px 0; color: #2196F3; border-bottom: 2px solid #2196F3; padding-bottom: 8px;">
+            ℹ️ Thông tin Animation
+          </h4>
+          
+          <div style="margin-bottom: 15px; padding: 10px; background: #e3f2fd; border-radius: 5px;">
+            <h5 style="margin: 0 0 10px 0; color: #1565c0;">🚗 Thông tin phương tiện</h5>
+            <p style="margin: 5px 0;"><strong>Loại:</strong> ${getVehicleTypeName()}</p>
+            <p style="margin: 5px 0;"><strong>Số lượng:</strong> ${vehicleMarkers.length}</p>
+            <p style="margin: 5px 0;"><strong>Trạng thái:</strong> ${isVehicleAnimating ? 'Đang di chuyển' : 'Đứng yên'}</p>
+            <p style="margin: 5px 0;"><strong>Tạm dừng:</strong> ${isAnimationPaused ? 'Có' : 'Không'}</p>
+          </div>
+          
+          <div style="margin-bottom: 15px; padding: 10px; background: #f3e5f5; border-radius: 5px;">
+            <h5 style="margin: 0 0 10px 0; color: #7b1fa2;">⚡ Thông tin di chuyển</h5>
+            <p style="margin: 5px 0;"><strong>Tốc độ:</strong> ${vehicleSpeed}ms/điểm</p>
+            <p style="margin: 5px 0;"><strong>Hướng:</strong> ${vehicleDirection > 0 ? 'Tiến' : 'Lùi'}</p>
+            <p style="margin: 5px 0;"><strong>Vị trí hiện tại:</strong> ${vehicleCurrentIndex + 1}/${currentRoute.length}</p>
+            <p style="margin: 5px 0;"><strong>Tiến độ:</strong> ${((vehicleCurrentIndex + 1) / currentRoute.length * 100).toFixed(1)}%</p>
+          </div>
+          
+          <div style="margin-bottom: 15px; padding: 10px; background: #e8f5e8; border-radius: 5px;">
+            <h5 style="margin: 0 0 10px 0; color: #2e7d32;">🎛️ Điều khiển</h5>
+            <p style="margin: 5px 0;"><strong>Chế độ giao thông:</strong> ${trafficMode ? 'Bật' : 'Tắt'}</p>
+            <p style="margin: 5px 0;"><strong>Chế độ ban đêm:</strong> ${nightMode ? 'Bật' : 'Tắt'}</p>
+            <p style="margin: 5px 0;"><strong>Tuyến đường:</strong> ${currentRoute.length} điểm</p>
+            <p style="margin: 5px 0;"><strong>Khoảng cách:</strong> ${calculateDistance(currentRoute).toFixed(2)} km</p>
+          </div>
+          
+          <div style="padding: 10px; background: #fff3cd; border-radius: 5px; border-left: 4px solid #ffc107;">
+            <strong>💡 Gợi ý:</strong><br>
+            • Sử dụng các nút điều khiển để thay đổi animation<br>
+            • Thay đổi loại phương tiện để có hiệu ứng khác nhau<br>
+            • Điều chỉnh tốc độ phù hợp với nhu cầu
+          </div>
+        </div>
+      `;
+      
+      L.popup({
+        maxWidth: 400,
+        maxHeight: 600
+      })
+      .setLatLng(map.getCenter())
+      .setContent(infoContent)
+      .openOn(map);
+      
+      updateStatus('ℹ️ Đã hiển thị thông tin animation');
+    }
+    
+    // Hàm bật/tắt chế độ giao thông
+    function toggleTrafficMode() {
+      trafficMode = !trafficMode;
+      const trafficBtn = document.getElementById('trafficBtn');
+      
+      if (trafficMode) {
+        trafficBtn.textContent = '🚦 Chế độ giao thông (BẬT)';
+        trafficBtn.classList.remove('btn-success');
+        trafficBtn.classList.add('btn-warning');
+        document.body.classList.add('traffic-mode');
+        updateStatus('🚦 Đã bật chế độ giao thông');
+      } else {
+        trafficBtn.textContent = '🚦 Chế độ giao thông';
+        trafficBtn.classList.remove('btn-warning');
+        trafficBtn.classList.add('btn-success');
+        document.body.classList.remove('traffic-mode');
+        updateStatus('🚦 Đã tắt chế độ giao thông');
+      }
+    }
+    
+    // Hàm bật/tắt chế độ ban đêm
+    function toggleNightMode() {
+      nightMode = !nightMode;
+      const nightBtn = document.getElementById('nightBtn');
+      
+      if (nightMode) {
+        nightBtn.textContent = '🌙 Chế độ ban đêm (BẬT)';
+        nightBtn.classList.remove('btn-info');
+        nightBtn.classList.add('btn-warning');
+        document.body.classList.add('night-mode');
+        updateStatus('🌙 Đã bật chế độ ban đêm');
+      } else {
+        nightBtn.textContent = '🌙 Chế độ ban đêm';
+        nightBtn.classList.remove('btn-warning');
+        nightBtn.classList.add('btn-info');
+        document.body.classList.remove('night-mode');
+        updateStatus('🌙 Đã tắt chế độ ban đêm');
+      }
+    }
+    
+    // Hàm đổi kiểu bản đồ
+    function changeMapStyle() {
+      const style = document.getElementById('mapStyle').value;
+      if (currentMapStyle !== style) {
+        map.removeLayer(mapLayers[currentMapStyle]);
+        mapLayers[style].addTo(map);
+        currentMapStyle = style;
+      }
+    }
+    
+    // Hàm tính khoảng cách
+    function calculateDistance(coords) {
+      let totalDistance = 0;
+      for (let i = 1; i < coords.length; i++) {
+        const lat1 = coords[i-1][0];
+        const lon1 = coords[i-1][1];
+        const lat2 = coords[i][0];
+        const lon2 = coords[i][1];
+        
+        const R = 6371; // Bán kính Trái Đất (km)
+        const dLat = (lat2 - lat1) * Math.PI / 180;
+        const dLon = (lon2 - lon1) * Math.PI / 180;
+        const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                  Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                  Math.sin(dLon/2) * Math.sin(dLon/2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        totalDistance += R * c;
+      }
+      return totalDistance;
+    }
+    
+    // Hàm cập nhật thông tin tuyến đường
+    function updateRouteInfo() {
+      if (currentRoute.length >= 2) {
+        const distance = calculateDistance(currentRoute);
+        const duration = Math.round(distance * 3); // Ước tính thời gian (phút)
+        
+        document.getElementById('routeDistance').textContent = `Khoảng cách: ${distance.toFixed(2)} km`;
+        document.getElementById('routeDuration').textContent = `Thời gian: ~${duration} phút`;
+        document.getElementById('routePoints').textContent = `Số điểm: ${currentRoute.length}`;
+        document.getElementById('routeInfo').style.display = 'block';
+      } else {
+        document.getElementById('routeInfo').style.display = 'none';
+      }
+    }
+    
+    // Hàm cập nhật trạng thái
+    function updateStatus(message) {
+      document.getElementById('statusBar').textContent = message;
+    }
+    
+    // Hàm bật/tắt chế độ vẽ
+    function toggleDrawMode() {
+      isDrawingMode = !isDrawingMode;
+      const drawBtn = document.getElementById('drawBtn');
+      
+      if (isDrawingMode) {
+        drawBtn.textContent = '⏹️ Dừng vẽ';
+        drawBtn.classList.add('active');
+        map.getContainer().style.cursor = 'crosshair';
+        
+        // Không tự động hiển thị mục tiêu khi bắt đầu vẽ
+        // Mục tiêu chỉ hiển thị khi tìm kiếm
+        
+        // Thu nhỏ bản đồ để xem tổng quan nhưng vẫn nhìn rõ đường
+        const drawZoom = detailViewMode ? 16 : 14; // Zoom cao hơn nếu ở chế độ chi tiết
+        map.setZoom(drawZoom);
+        updateStatus(`Đang vẽ tuyến đường - Click để thêm điểm (Zoom: ${drawZoom}) - Sử dụng "🔍 Tìm mục tiêu gần" để hiển thị mục tiêu`);
+      } else {
+        drawBtn.textContent = '🎨 Vẽ đường';
+        drawBtn.classList.remove('active');
+        map.getContainer().style.cursor = '';
+        updateStatus('Sẵn sàng vẽ tuyến đường');
+      }
+    }
+    
+    // Hàm xóa đường (cập nhật)
+    function clearRoute() {
+      clearCurrentRoute();
+      // Xóa vệt nếu đang hiển thị
+      if (personMarker) {
+        clearTrail();
+      }
+      updateStatus('Đã xóa tuyến đường hiện tại');
+    }
+    
+    // Hàm xuất tuyến đường
+    function exportRoute() {
+      if (allRoutes.length === 0 && currentRoute.length === 0) {
+        alert('Chưa có tuyến đường để xuất!');
+        return;
+      }
+      
+      let routeData;
+      
+      if (allRoutes.length > 0) {
+        // Xuất tất cả tuyến đường
+        routeData = {
+          type: 'multiple_routes',
+          routes: allRoutes,
+          totalRoutes: allRoutes.length,
+          totalDistance: allRoutes.reduce((sum, route) => sum + route.distance, 0),
+          timestamp: new Date().toISOString()
+        };
+      } else {
+        // Xuất tuyến đường hiện tại
+        routeData = {
+          type: 'single_route',
+          startPoint: document.getElementById('startPoint').value || 'Điểm bắt đầu',
+          endPoint: document.getElementById('endPoint').value || 'Điểm kết thúc',
+          blockName: document.getElementById('blockName').value || 'Không có tên khối',
+          routeType: document.getElementById('routeType').value,
+          coordinates: currentRoute,
+          distance: calculateDistance(currentRoute),
+          timestamp: new Date().toISOString()
+        };
+      }
+      
+      const dataStr = JSON.stringify(routeData, null, 2);
+      const dataBlob = new Blob([dataStr], {type: 'application/json'});
+      const url = URL.createObjectURL(dataBlob);
+      
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `tuyen-duong-${new Date().getTime()}.json`;
+      link.click();
+      
+      updateStatus(`Đã xuất ${routeData.type === 'multiple_routes' ? allRoutes.length : 1} tuyến đường`);
+    }
+    
+    // Hàm nhập tuyến đường
+    function importRoute() {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = '.json';
+      input.onchange = function(e) {
+        const file = e.target.files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = function(e) {
+            try {
+              const routeData = JSON.parse(e.target.result);
+              
+              // Xử lý format JSON mới với exportInfo và routes
+              if (routeData.exportInfo && routeData.routes) {
+                // Nhập nhiều tuyến đường từ format export
+                allRoutes = routeData.routes || [];
+                updateRouteSelector();
+                updateRoutesList();
+                clearCurrentRoute();
+                
+                // Hiển thị thông tin chi tiết về file đã nhập
+                const totalDistance = allRoutes.reduce((sum, route) => sum + route.distance, 0);
+                updateStatus(`Đã nhập ${allRoutes.length} tuyến đường từ file export (Tổng: ${totalDistance.toFixed(2)} km)`);
+                
+                // Hiển thị tuyến đường đầu tiên nếu có
+                if (allRoutes.length > 0) {
+                  document.getElementById('routeSelector').value = 0;
+                  switchRoute();
+                }
+              } else if (routeData.type === 'multiple_routes') {
+                // Nhập nhiều tuyến đường từ format cũ
+                allRoutes = routeData.routes || [];
+                updateRouteSelector();
+                updateRoutesList();
+                clearCurrentRoute();
+                updateStatus(`Đã nhập ${allRoutes.length} tuyến đường`);
+              } else {
+                // Nhập tuyến đường đơn
+                clearAllRoutes();
+                
+                const newRoute = {
+                  id: Date.now(),
+                  name: `${routeData.startPoint} → ${routeData.endPoint}`,
+                  startPoint: routeData.startPoint || '',
+                  endPoint: routeData.endPoint || '',
+                  blockName: routeData.blockName || '',
+                  routeType: routeData.routeType || 'custom',
+                  coordinates: routeData.coordinates || [],
+                  distance: routeData.distance || 0,
+                  timestamp: routeData.timestamp || new Date().toISOString(),
+                  color: routeData.color || getRandomRouteColor()
+                };
+                
+                allRoutes.push(newRoute);
+                updateRouteSelector();
+                updateRoutesList();
+                
+                // Hiển thị tuyến đường đầu tiên
+                document.getElementById('routeSelector').value = 0;
+                switchRoute();
+                
+                updateStatus('Đã nhập tuyến đường');
+              }
+            } catch (error) {
+              alert('Lỗi khi đọc file: ' + error.message);
+              console.error('Chi tiết lỗi:', error);
+            }
+          };
+          reader.readAsText(file);
+        }
+      };
+      input.click();
+    }
+    
+    // Hàm vẽ tuyến đường đã nhập
+    function drawImportedRoute() {
+      if (currentRoute.length >= 2) {
+        // Vẽ đường
+        routePolyline = L.polyline(currentRoute, {
+          color: '#ffc107',
+          weight: 5,
+          opacity: 0.8,
+          smoothFactor: 1
+        }).addTo(map);
+        
+        // Vẽ marker
+        currentRoute.forEach((coord, index) => {
+          const marker = L.circleMarker(coord, {
+            radius: index === 0 ? 8 : (index === currentRoute.length - 1 ? 8 : 4),
+            fillColor: index === 0 ? '#28a745' : (index === currentRoute.length - 1 ? '#dc3545' : '#007cbf'),
+            color: index === 0 ? '#1e7e34' : (index === currentRoute.length - 1 ? '#c82333' : '#005a8b'),
+            weight: 2,
+            opacity: 1,
+            fillOpacity: 0.8
+          }).addTo(map);
+          
+          routeMarkers.push(marker);
+        });
+        
+        updateRouteInfo();
+      }
+    }
+    
+    // Hàm tìm mục tiêu gần tuyến đường
+    function checkNearbyTargets() {
+      if (currentRoute.length < 2) {
+        alert('Vui lòng vẽ tuyến đường trước khi tìm mục tiêu gần!');
         return;
       }
 
-      agents.push({ name, color, time, route });
-      updateAgentTable();
+      // Xóa các marker mục tiêu gần cũ
+      hideNearbyTargets();
 
-      document.getElementById("agentName").value = "";
-      document.getElementById("agentRoute").value = "";
-    }
+      const nearbyList = document.getElementById('nearbyList');
+      nearbyList.innerHTML = ''; // Xóa danh sách cũ
 
-    function removeAgent(index) {
-      agents.splice(index, 1);
-      updateAgentTable();
-    }
-
-    async function showAllRoutes() {
-      document.getElementById("loading").style.display = "flex";
-      setTimeout(async () => {
-        map.eachLayer(layer => {
-          if (!(layer instanceof L.TileLayer)) {
-            map.removeLayer(layer);
+      // Tính khoảng cách từ mỗi mục tiêu đến tuyến đường
+      const targetDistances = targets.map(target => {
+        let minDistance = Infinity;
+        
+        // Tìm khoảng cách ngắn nhất từ mục tiêu đến bất kỳ điểm nào trên tuyến đường
+        currentRoute.forEach(routePoint => {
+          const distance = calculateDistanceBetweenPoints(routePoint, target.coords);
+          if (distance < minDistance) {
+            minDistance = distance;
           }
         });
+        
+        return {
+          name: target.name,
+          coords: target.coords,
+          distance: minDistance
+        };
+      });
 
-        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-          attribution: '&copy; OpenStreetMap',
-          maxZoom: 19
+      // Sắp xếp theo khoảng cách tăng dần và lấy 5 mục tiêu gần nhất
+      const nearbyTargets = targetDistances
+        .sort((a, b) => a.distance - b.distance)
+        .slice(0, 5);
+
+      if (nearbyTargets.length > 0) {
+        nearbyTargets.forEach((target, index) => {
+          // Tạo marker cho mục tiêu gần với label động
+          const marker = L.marker(target.coords, {
+            icon: L.divIcon({
+              className: 'custom-div-icon',
+              html: `
+                <div style="position: relative;">
+                  <div style="background-color: #dc3545; width: 36px; height: 36px; border-radius: 50%; border: 4px solid white; box-shadow: 0 4px 12px rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; color: white; font-size: 16px; font-weight: bold; cursor: pointer; transition: all 0.3s ease; position: relative;" onmouseover="this.style.transform='scale(1.3)'; this.style.boxShadow='0 6px 20px rgba(0,0,0,0.7)';" onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.5)';">
+                    <div style="font-size: 18px;">🎯</div>
+                    <div style="position: absolute; top: -4px; right: -4px; background: #dc3545; color: white; width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; border: 2px solid white; box-shadow: 0 2px 6px rgba(0,0,0,0.3);">${index + 1}</div>
+                  </div>
+                </div>
+              `,
+              iconSize: [36, 36],
+              iconAnchor: [18, 18]
+            })
+          }).addTo(map);
+          
+          // Tạo label riêng biệt để có thể điều chỉnh vị trí theo zoom
+          const labelOffset = [
+            { x: 40, y: -8 },   // Phải
+            { x: -40, y: -8 },  // Trái
+            { x: 0, y: 40 },    // Dưới
+            { x: 0, y: -40 },   // Trên
+            { x: 60, y: -20 }   // Chéo phải
+          ];
+          
+          const offset = labelOffset[index % 5];
+          
+          // Tạo label động
+          const label = L.marker(target.coords, {
+            icon: L.divIcon({
+              className: 'label-icon',
+              html: `
+                <div style="background: ${index === 0 ? 'rgba(220,53,69,0.9)' : 'rgba(0,124,191,0.9)'}; color: white; padding: 5px 10px; border-radius: 5px; font-size: 12px; font-weight: bold; white-space: nowrap; min-width: 140px; text-align: center; box-shadow: 0 3px 8px rgba(0,0,0,0.4); border: 2px solid white; transform: translate(${offset.x}px, ${offset.y}px);">${target.name}</div>
+              `,
+              iconSize: [0, 0],
+              iconAnchor: [0, 0]
+            })
+          }).addTo(map);
+          
+          const distanceText = target.distance < 1000 ? 
+            `${target.distance.toFixed(0)} m` : 
+            `${(target.distance / 1000).toFixed(2)} km`;
+          
+          marker.bindPopup(`
+            <div style="min-width: 280px; padding: 8px;">
+              <h4 style="margin: 0 0 8px 0; color: ${index === 0 ? '#dc3545' : '#007cbf'}; font-size: 16px; border-bottom: 2px solid ${index === 0 ? '#dc3545' : '#007cbf'}; padding-bottom: 5px;">🎯 ${target.name}</h4>
+              <p style="margin: 8px 0; font-size: 13px;"><strong>Khoảng cách:</strong> ${distanceText}</p>
+              <p style="margin: 8px 0; font-size: 13px;"><strong>Thứ hạng:</strong> ${index + 1}/5</p>
+              <p style="margin: 8px 0; font-size: 13px;"><strong>Tọa độ:</strong> ${target.coords[0].toFixed(6)}, ${target.coords[1].toFixed(6)}</p>
+              <div style="margin-top: 10px; padding: 8px; background: ${index === 0 ? '#fff5f5' : '#f0f8ff'}; border-radius: 5px; font-size: 12px; color: #666; border-left: 4px solid ${index === 0 ? '#dc3545' : '#007cbf'};">
+                <strong>Thông tin:</strong><br>
+                • Loại: Mục tiêu gần tuyến đường<br>
+                • Ưu tiên: ${index === 0 ? 'Cao nhất' : 'Cao'}<br>
+                • Trạng thái: Hoạt động
+              </div>
+            </div>
+          `);
+          
+          nearbyTargetMarkers.push(marker);
+          nearbyTargetMarkers.push(label);
+
+          // Thêm vào danh sách
+          const listItem = document.createElement('div');
+          listItem.className = 'legend-item';
+          listItem.style.marginBottom = '8px';
+          listItem.style.padding = '5px';
+          listItem.style.backgroundColor = index === 0 ? '#e8f4fd' : '#f8f9fa';
+          listItem.style.borderRadius = '3px';
+          listItem.style.borderLeft = index === 0 ? '3px solid #007cbf' : '1px solid #ddd';
+          listItem.style.cursor = 'pointer';
+          
+          listItem.onclick = () => {
+            map.setView(target.coords, 18);
+            marker.openPopup();
+          };
+          
+          listItem.innerHTML = `
+            <div style="display: flex; align-items: center;">
+              <div class="legend-color" style="background: ${index === 0 ? '#dc3545' : '#007cbf'}; margin-right: 8px;"></div>
+              <div>
+                <div style="font-weight: 600; font-size: 12px;">${target.name}</div>
+                <div style="font-size: 11px; color: #666;">Khoảng cách: ${distanceText}</div>
+              </div>
+            </div>
+          `;
+          nearbyList.appendChild(listItem);
+        });
+        
+        document.getElementById('nearbyInfo').style.display = 'block';
+        updateStatus(`Tìm thấy ${nearbyTargets.length} mục tiêu gần tuyến đường - Click vào danh sách để xem chi tiết`);
+      } else {
+        nearbyList.innerHTML = '<p style="color: #666; font-style: italic;">Không tìm thấy mục tiêu gần tuyến đường.</p>';
+        document.getElementById('nearbyInfo').style.display = 'block';
+        updateStatus('Không tìm thấy mục tiêu gần');
+      }
+    }
+
+    // Hàm hiển thị tất cả mục tiêu
+    function showAllTargets() {
+      // Xóa các marker cũ
+      hideAllTargets();
+      
+      targets.forEach((target, index) => {
+        // Tạo marker chính với icon xác định mục tiêu màu đỏ
+        const marker = L.marker(target.coords, {
+          icon: L.divIcon({
+            className: 'custom-div-icon',
+            html: `
+              <div style="background-color: #dc3545; width: 36px; height: 36px; border-radius: 50%; border: 4px solid white; box-shadow: 0 4px 12px rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; color: white; font-size: 16px; font-weight: bold; cursor: pointer; transition: all 0.3s ease; position: relative;" onmouseover="this.style.transform='scale(1.3)'; this.style.boxShadow='0 6px 20px rgba(0,0,0,0.7)';" onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.5)';">
+                <div style="font-size: 18px;">🎯</div>
+                <div style="position: absolute; top: -4px; right: -4px; background: #dc3545; color: white; width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; border: 2px solid white; box-shadow: 0 2px 6px rgba(0,0,0,0.3);">${index + 1}</div>
+              </div>
+            `,
+            iconSize: [36, 36],
+            iconAnchor: [18, 18]
+          })
         }).addTo(map);
-
-        // Danh sách mục tiêu
-        const targets = [
-          "BCA Cục truyền thông - Nguyễn Hữu",
-          "BCA - 30 Trần Bình Trọng",
-          "Cục công nghệ cao - 58 Nguyễn Du, Hà Nội",
-          "Các đơn vị CA - Nguyễn Thượng Hiền",
-          "Cục Kỹ thuật nghiệp vụ - 10 Trần Quốc Toản",
-          "Cục Cảnh sát hình sự - 14 - 16 Tôn Thất Tùng",
-          "Cục CSGT - 112 Lê Duẩn",
-          "Cục QLHC - 47 Phạm Văn Đồng",
-          "Cục xây dựng phong trào - 54 Lê Đại Hành",
-          "Cục cảnh sát QLHC - 47 Phạm Văn Đồng",
-          "TT phát triển - Yên Xá, Tân Triều",
-          "Thanh tra Bộ - 99 Nguyễn Tuân",
-          "Cục CSGT - 123 Nguyễn Tuân",
-          "Cục Tổ chức cán bộ - 47 Phạm Văn Đồng",
-          "Bộ Tư lệnh Cảnh sát cơ động - Sở Tham mưu",
-          "Cục An ninh quốc gia - 25 Tô Ngọc Vân",
-          "Cục H58 nghiệm vụ - 67 Trần Hưng Đạo",
-          "TAND tối cao - 48 Lý Thường Kiệt",
-          "Viện kiểm sát tối cao - 27 Hùng Vương, Điện Biên Phủ",
-          "Cục phòng chống ma túy - Số 7 Lê Quang Đạo",
-          "Cục CS môi trường - 30 Trần Quốc Hoàn",
-          "Cục điều tra tội phạm ma túy - Ngõ 84 Phương Canh",
-          "Doanh trại K01 - 88 Xuân Phương",
-          "Cục điều tra - Số 1A Kiều Mai",
-          "Trung tâm huấn luyện K01 - Số 1A Kiều Mai",
-          "Bệnh viện y học cổ truyền BCA - 278 Lương Thế Vinh",
-          "Viện kiểm sát tối cao - 56 Phạm Văn Bạch",
-          "BCA - 47 Phạm Văn Đồng",
-          "Nhà máy in tiền quốc gia - 30 Phạm Văn Đồng",
-          "Kho bạc Nhà nước - 32 Cát Linh",
-          "Ngân hàng NN - 49 Lý Thái Tổ",
-          "Hội sở TW1 - Số 49B Bà Triệu",
-          "Vĩnh Hưng",
-          "Trụ sở Bộ Tài chính - Số 28 Trần Hưng Đạo",
-          "Kho viện hành chính quốc gia HCM",
-          "135 Ngô Thì Sỹ",
-          "Các đơn vị CA - 60 Nguyễn Văn Huyên",
-          "Công ty dịch vụ Agribank - Số 8 Chùa Bộc",
-          "Ngân hàng NN - Số 4 Xa Đàn"
+        
+        // Tạo label riêng biệt với offset động và style rõ ràng hơn
+        const labelOffset = [
+          { x: 40, y: -8 },   // Phải
+          { x: -40, y: -8 },  // Trái
+          { x: 0, y: 40 },    // Dưới
+          { x: 0, y: -40 }    // Trên
         ];
-
-        // Geocode tất cả mục tiêu trước để tránh gọi API lặp lại
-        const targetCoords = {};
-        for (const t of targets) {
-          targetCoords[t] = await geocodeAddress(t);
-        }
-
-        for (const agent of agents) {
-          const waypoints = [];
-          for (const point of agent.route) {
-            const coords = await geocodeAddress(point);
-            if (coords) {
-              waypoints.push(L.latLng(coords[0], coords[1]));
-
-              // Hiển thị các mục tiêu khác gần điểm này dưới 5km
-              for (const t of targets) {
-                if (t !== point && targetCoords[t]) {
-                  const dist = haversineDistance(coords[0], coords[1], targetCoords[t][0], targetCoords[t][1]);
-                  if (dist <= 5) {
-                    L.marker([targetCoords[t][0], targetCoords[t][1]], {
-                      icon: L.icon({
-                        iconUrl: "https://cdn-icons-png.flaticon.com/512/484/484167.png", // icon cam mục tiêu
-                        iconSize: [32, 32],
-                        iconAnchor: [16, 32],
-                        popupAnchor: [0, -32]
-                      })
-                    }).addTo(map)
-                    .bindPopup(`<div style="font-size:1.1em;"><b style="color:#e67e22;">🎯 ${t}</b><br><span style="color:#555;">Cách <b>${point}</b>: <b>${dist.toFixed(2)} km</b></span></div>`);
-                  }
-                }
-              }
-            }
-          }
-
-          if (waypoints.length >= 2) {
-            L.Routing.control({
-              waypoints,
-              router: L.Routing.osrmv1({
-                serviceUrl: "https://router.project-osrm.org/route/v1",
-                profile: "car"
-              }),
-              lineOptions: {
-                styles: [{ color: agent.color, weight: 4 }]
-              },
-              addWaypoints: false,
-              draggableWaypoints: false,
-              createMarker: (i, wp) => {
-                let iconUrl;
-                const iconSize = [35, 35];
-
-                if (i === 0) {
-                  iconUrl = "https://cdn-icons-png.flaticon.com/512/684/684908.png"; // xanh
-                } else if (i === waypoints.length - 1) {
-                  iconUrl = "https://cdn-icons-png.flaticon.com/512/149/149060.png"; // đỏ
-                } else {
-                  iconUrl = "https://cdn-icons-png.flaticon.com/512/565/565547.png"; // xám
-                }
-
-                const icon = L.icon({
-                  iconUrl,
-                  iconSize,
-                  iconAnchor: [iconSize[0] / 2, iconSize[1]],
-                  popupAnchor: [0, -30]
-                });
-
-                const label = i === 0
-                  ? "<span style='color:#2b7cff;'>🚩 Xuất phát</span>"
-                  : i === waypoints.length - 1
-                    ? "<span style='color:#ff4d4f;'>🏁 Kết thúc</span>"
-                    : `<span style='color:#888;'>📍 Trung điểm ${i + 1}</span>`;
-
-                return L.marker(wp.latLng, { icon }).bindPopup(
-                  `<div style="font-size:1.1em;"><b>${agent.name}</b><br>${label}<br>Giờ: <b>${agent.time}</b></div>`
-                );
-              }
-            }).addTo(map);
-          }
-        }
-        document.getElementById("loading").style.display = "none";
-      }, 100);
+        
+        const offset = labelOffset[index % 4];
+        
+        // Tạo label động với style rõ ràng hơn
+        const label = L.marker(target.coords, {
+          icon: L.divIcon({
+            className: 'label-icon',
+            html: `
+              <div style="background: linear-gradient(135deg, #dc3545, #c82333); color: white; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: bold; white-space: nowrap; min-width: 140px; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.4); border: 2px solid white; transform: translate(${offset.x}px, ${offset.y}px); text-shadow: 1px 1px 2px rgba(0,0,0,0.5);">${target.name}</div>
+            `,
+            iconSize: [0, 0],
+            iconAnchor: [0, 0]
+          })
+        }).addTo(map);
+        
+        marker.bindPopup(`
+          <div style="min-width: 280px; padding: 8px;">
+            <h4 style="margin: 0 0 10px 0; color: #dc3545; font-size: 16px; border-bottom: 2px solid #dc3545; padding-bottom: 8px;">🏢 ${target.name}</h4>
+            <p style="margin: 8px 0; font-size: 13px;"><strong>ID:</strong> ${index + 1}</p>
+            <p style="margin: 8px 0; font-size: 13px;"><strong>Tọa độ:</strong> ${target.coords[0].toFixed(6)}, ${target.coords[1].toFixed(6)}</p>
+            <div style="margin-top: 12px; padding: 8px; background: #fff5f5; border-radius: 5px; font-size: 12px; color: #721c24; border-left: 4px solid #dc3545;">
+              <strong>Thông tin:</strong><br>
+              • Loại: Mục tiêu quan trọng<br>
+              • Trạng thái: Hoạt động<br>
+              • Ưu tiên: Cao<br>
+              • ID: ${index + 1}
+            </div>
+          </div>
+        `);
+        
+        targetMarkers.push(marker);
+        targetMarkers.push(label);
+      });
+      
+      updateStatus(`Đã hiển thị ${targets.length} mục tiêu với style rõ ràng`);
     }
 
-    function saveAgents() {
-      const blob = new Blob([JSON.stringify(agents, null, 2)], { type: "application/json" });
-      const link = document.createElement("a");
-      link.href = URL.createObjectURL(blob);
-      link.download = "agents.json";
-      link.click();
+    // Hàm ẩn tất cả mục tiêu
+    function hideAllTargets() {
+      targetMarkers.forEach(marker => map.removeLayer(marker));
+      targetMarkers = [];
+      hideNearbyTargets();
+      updateStatus('Đã ẩn tất cả mục tiêu');
     }
 
-    function loadAgents(event) {
-      const file = event.target.files[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = e => {
-        try {
-          agents = JSON.parse(e.target.result);
-          updateAgentTable();
-        } catch (err) {
-          alert("File JSON không hợp lệ.");
+    // Hàm ẩn mục tiêu gần
+    function hideNearbyTargets() {
+      nearbyTargetMarkers.forEach(marker => map.removeLayer(marker));
+      nearbyTargetMarkers = [];
+    }
+
+    // Hàm lưu tuyến đường hiện tại
+    function saveCurrentRoute() {
+      if (currentRoute.length < 2) {
+        alert('Vui lòng vẽ tuyến đường trước khi lưu!');
+        return;
+      }
+
+      const startName = document.getElementById('startPoint').value || 'Điểm bắt đầu';
+      const endName = document.getElementById('endPoint').value || 'Điểm kết thúc';
+      const blockName = document.getElementById('blockName').value || 'Không có tên khối';
+      const routeType = document.getElementById('routeType').value;
+      const routeColor = document.getElementById('routeColor').value;
+
+      const routeData = {
+        id: Date.now(),
+        name: `${startName} → ${endName}`,
+        startPoint: startName,
+        endPoint: endName,
+        blockName: blockName,
+        routeType: routeType,
+        coordinates: [...currentRoute],
+        distance: calculateDistance(currentRoute),
+        timestamp: new Date().toISOString(),
+        color: routeColor,
+        metadata: {
+          totalPoints: currentRoute.length,
+          estimatedDuration: Math.round(calculateDistance(currentRoute) * 3), // phút
+          createdBy: 'Ứng dụng Vẽ Tuyến đường',
+          version: '2.0'
         }
       };
-      reader.readAsText(file);
+
+      allRoutes.push(routeData);
+      updateRouteSelector();
+      updateRoutesList();
+      
+      // Lưu vào localStorage
+      saveRoutesToStorage();
+      
+      // Xóa tuyến đường hiện tại để vẽ tuyến mới
+      clearCurrentRoute();
+      
+      updateStatus(`Đã lưu tuyến đường: ${routeData.name}`);
     }
+
+    // Hàm lưu tuyến đường vào localStorage
+    function saveRoutesToStorage() {
+      try {
+        localStorage.setItem('savedRoutes', JSON.stringify(allRoutes));
+        console.log('Đã lưu tuyến đường vào localStorage');
+      } catch (error) {
+        console.error('Lỗi khi lưu vào localStorage:', error);
+      }
+    }
+
+    // Hàm tải tuyến đường từ localStorage
+    function loadRoutesFromStorage() {
+      try {
+        const savedRoutes = localStorage.getItem('savedRoutes');
+        if (savedRoutes) {
+          allRoutes = JSON.parse(savedRoutes);
+          updateRouteSelector();
+          updateRoutesList();
+          updateStatus(`Đã tải ${allRoutes.length} tuyến đường từ bộ nhớ`);
+        }
+      } catch (error) {
+        console.error('Lỗi khi tải từ localStorage:', error);
+      }
+    }
+
+    // Hàm chuyển đổi tuyến đường
+    function switchRoute() {
+      const selector = document.getElementById('routeSelector');
+      const selectedIndex = parseInt(selector.value);
+      
+      if (selectedIndex === -1) {
+        clearCurrentRoute();
+        return;
+      }
+
+      const selectedRoute = allRoutes[selectedIndex];
+      if (selectedRoute) {
+        // Xóa tuyến đường hiện tại
+        clearCurrentRoute();
+        
+        // Hiển thị tuyến đường được chọn
+        currentRoute = [...selectedRoute.coordinates];
+        currentRouteIndex = selectedIndex;
+        
+        // Cập nhật form
+        document.getElementById('startPoint').value = selectedRoute.startPoint;
+        document.getElementById('endPoint').value = selectedRoute.endPoint;
+        document.getElementById('blockName').value = selectedRoute.blockName;
+        document.getElementById('routeType').value = selectedRoute.routeType;
+        document.getElementById('routeColor').value = selectedRoute.color; // Cập nhật màu
+        
+        // Vẽ tuyến đường
+        drawRoute(selectedRoute.color);
+        updateRouteInfo();
+        
+        updateStatus(`Đã chuyển sang tuyến đường: ${selectedRoute.name}`);
+      }
+    }
+
+    // Hàm xóa tất cả tuyến đường
+    function clearAllRoutes() {
+      if (confirm('Bạn có chắc muốn xóa tất cả tuyến đường đã lưu?')) {
+        allRoutes = [];
+        clearCurrentRoute();
+        updateRouteSelector();
+        updateRoutesList();
+        
+        // Xóa khỏi localStorage
+        localStorage.removeItem('savedRoutes');
+        
+        updateStatus('Đã xóa tất cả tuyến đường');
+      }
+    }
+
+    // Hàm xuất tuyến đường ra file JSON
+    function exportRoutesToJSON() {
+      if (allRoutes.length === 0) {
+        alert('Chưa có tuyến đường để xuất!');
+        return;
+      }
+      
+      const exportData = {
+        exportInfo: {
+          application: 'Ứng dụng Vẽ Tuyến đường',
+          version: '2.0',
+          exportDate: new Date().toISOString(),
+          totalRoutes: allRoutes.length,
+          totalDistance: allRoutes.reduce((sum, route) => sum + route.distance, 0).toFixed(2)
+        },
+        routes: allRoutes
+      };
+      
+      const dataStr = JSON.stringify(exportData, null, 2);
+      const dataBlob = new Blob([dataStr], {type: 'application/json'});
+      const url = URL.createObjectURL(dataBlob);
+      
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `tuyen-duong-export-${new Date().toISOString().split('T')[0]}.json`;
+      link.click();
+      
+      updateStatus(`Đã xuất ${allRoutes.length} tuyến đường ra file JSON`);
+    }
+
+    // Hàm xóa tuyến đường hiện tại
+    function clearCurrentRoute() {
+      if (routePolyline) {
+        map.removeLayer(routePolyline);
+        routePolyline = null;
+      }
+      
+      routeMarkers.forEach(marker => map.removeLayer(marker));
+      routeMarkers = [];
+      
+      currentRoute = [];
+      currentRouteIndex = -1;
+      updateRouteInfo();
+    }
+
+    // Hàm vẽ tuyến đường
+    function drawRoute(color = '#ffc107') {
+      if (currentRoute.length >= 2) {
+        routePolyline = L.polyline(currentRoute, {
+          color: color,
+          weight: 5,
+          opacity: 0.8,
+          smoothFactor: 1
+        }).addTo(map);
+
+        // Vẽ marker cho từng điểm
+        currentRoute.forEach((coord, index) => {
+          const marker = L.circleMarker(coord, {
+            radius: index === 0 ? 8 : (index === currentRoute.length - 1 ? 8 : 4),
+            fillColor: index === 0 ? '#28a745' : (index === currentRoute.length - 1 ? '#dc3545' : '#007cbf'),
+            color: index === 0 ? '#1e7e34' : (index === currentRoute.length - 1 ? '#c82333' : '#005a8b'),
+            weight: 2,
+            opacity: 1,
+            fillOpacity: 0.8
+          }).addTo(map);
+          
+          routeMarkers.push(marker);
+        });
+      }
+    }
+
+    // Hàm cập nhật selector tuyến đường
+    function updateRouteSelector() {
+      const selector = document.getElementById('routeSelector');
+      selector.innerHTML = '<option value="-1">-- Chọn tuyến đường --</option>';
+      
+      allRoutes.forEach((route, index) => {
+        const option = document.createElement('option');
+        option.value = index;
+        option.textContent = `${route.name} (${route.distance.toFixed(2)} km)`;
+        selector.appendChild(option);
+      });
+    }
+
+    // Hàm cập nhật danh sách tuyến đường
+    function updateRoutesList() {
+      const routesList = document.getElementById('routesList');
+      const content = document.getElementById('routesListContent');
+      
+      if (allRoutes.length === 0) {
+        routesList.style.display = 'none';
+        return;
+      }
+      
+      content.innerHTML = '';
+      allRoutes.forEach((route, index) => {
+        const routeItem = document.createElement('div');
+        routeItem.className = 'legend-item';
+        routeItem.style.marginBottom = '8px';
+        routeItem.style.padding = '8px';
+        routeItem.style.backgroundColor = '#f8f9fa';
+        routeItem.style.borderRadius = '5px';
+        routeItem.style.borderLeft = `3px solid ${route.color}`;
+        routeItem.style.cursor = 'pointer';
+        
+        routeItem.onclick = () => {
+          document.getElementById('routeSelector').value = index;
+          switchRoute();
+        };
+        
+        routeItem.innerHTML = `
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+              <div style="font-weight: 600; font-size: 12px; color: ${route.color};">${route.name}</div>
+              <div style="font-size: 11px; color: #666;">
+                ${route.startPoint} → ${route.endPoint}
+              </div>
+              <div style="font-size: 10px; color: #888;">
+                ${route.distance.toFixed(2)} km • ${route.routeType} • ${new Date(route.timestamp).toLocaleString()}
+              </div>
+            </div>
+            <div style="font-size: 10px; color: #999;">#${index + 1}</div>
+          </div>
+        `;
+        
+        content.appendChild(routeItem);
+      });
+      
+      routesList.style.display = 'block';
+    }
+
+    // Hàm tạo màu ngẫu nhiên cho tuyến đường
+    function getRandomRouteColor() {
+      const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#feca57', '#ff9ff3', '#54a0ff', '#5f27cd'];
+      return colors[Math.floor(Math.random() * colors.length)];
+    }
+
+    // Hàm tính khoảng cách giữa 2 điểm
+    function calculateDistanceBetweenPoints(point1, point2) {
+      const lat1 = point1[0];
+      const lon1 = point1[1];
+      const lat2 = point2[0];
+      const lon2 = point2[1];
+      
+      const R = 6371000; // Bán kính Trái Đất (m)
+      const dLat = (lat2 - lat1) * Math.PI / 180;
+      const dLon = (lon2 - lon1) * Math.PI / 180;
+      const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                Math.sin(dLon/2) * Math.sin(dLon/2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+      return R * c;
+    }
+    
+    // Xử lý sự kiện click
+    map.on('click', function(e) {
+      if (!isDrawingMode) return;
+      
+      const latlng = e.latlng;
+      currentRoute.push([latlng.lat, latlng.lng]);
+      
+      const startName = document.getElementById('startPoint').value || 'Điểm bắt đầu';
+      const endName = document.getElementById('endPoint').value || 'Điểm kết thúc';
+      
+      // Điểm đầu tiên
+      if (currentRoute.length === 1) {
+        const marker = L.circleMarker(latlng, {
+          radius: 8,
+          fillColor: "#28a745",
+          color: "#1e7e34",
+          weight: 2,
+          opacity: 1,
+          fillOpacity: 0.8
+        }).addTo(map).bindPopup(`🚀 ${startName}<br>Tọa độ: ${latlng.lat.toFixed(4)}, ${latlng.lng.toFixed(4)}`);
+        
+        routeMarkers.push(marker);
+        updateStatus(`Đã thêm điểm bắt đầu: ${startName}`);
+      }
+      // Điểm cuối
+      else if (currentRoute.length >= 2) {
+        // Xóa marker cuối cũ
+        if (routeMarkers.length > 1) {
+          map.removeLayer(routeMarkers[routeMarkers.length - 1]);
+          routeMarkers.pop();
+        }
+        
+        // Thêm marker trung gian nếu có
+        if (currentRoute.length > 2) {
+          const midMarker = L.circleMarker(latlng, {
+            radius: 4,
+            fillColor: "#007cbf",
+            color: "#005a8b",
+            weight: 1,
+            opacity: 1,
+            fillOpacity: 0.8
+          }).addTo(map).bindPopup(`Điểm ${currentRoute.length - 1}: ${latlng.lat.toFixed(4)}, ${latlng.lng.toFixed(4)}`);
+          
+          routeMarkers.push(midMarker);
+        }
+        
+        // Thêm marker cuối
+        const endMarker = L.circleMarker(latlng, {
+          radius: 8,
+          fillColor: "#dc3545",
+          color: "#c82333",
+          weight: 2,
+          opacity: 1,
+          fillOpacity: 0.8
+        }).addTo(map).bindPopup(`🏁 ${endName}<br>Tọa độ: ${latlng.lat.toFixed(4)}, ${latlng.lng.toFixed(4)}`);
+        
+        routeMarkers.push(endMarker);
+        updateStatus(`Đã thêm điểm kết thúc: ${endName}`);
+      }
+      
+      // Vẽ đường
+      if (currentRoute.length >= 2) {
+        if (routePolyline) {
+          map.removeLayer(routePolyline);
+        }
+        
+        const selectedColor = document.getElementById('routeColor').value;
+        
+        // Tạo polyline với style nâng cao
+        routePolyline = L.polyline(currentRoute, {
+          color: selectedColor,
+          weight: 6,
+          opacity: 0.9,
+          smoothFactor: 1,
+          dashArray: currentRoute.length > 5 ? '10, 5' : null, // Dotted line cho tuyến dài
+          lineCap: 'round',
+          lineJoin: 'round'
+        }).addTo(map).bindPopup(`
+          <div style="min-width: 250px; padding: 8px;">
+            <h4 style="margin: 0 0 8px 0; color: ${selectedColor}; border-bottom: 2px solid ${selectedColor}; padding-bottom: 5px;">
+              🛣️ Tuyến đường
+            </h4>
+            <p style="margin: 6px 0;"><strong>🎯 Điểm bắt đầu:</strong> ${startName}</p>
+            <p style="margin: 6px 0;"><strong>🏁 Điểm kết thúc:</strong> ${endName}</p>
+            <p style="margin: 6px 0;"><strong>📏 Khoảng cách:</strong> ${calculateDistance(currentRoute).toFixed(2)} km</p>
+            <p style="margin: 6px 0;"><strong>📍 Số điểm:</strong> ${currentRoute.length}</p>
+            <div style="margin-top: 10px; padding: 8px; background: #f8f9fa; border-radius: 4px; font-size: 12px; color: #666;">
+              <strong>💡 Tip:</strong> Click "✅ Hoàn thành tuyến" để xem thông tin chi tiết
+            </div>
+          </div>
+        `);
+        
+        // Tự động điều chỉnh view khi thêm điểm mới
+        if (currentRoute.length >= 2) {
+          const bounds = L.latLngBounds(currentRoute);
+          map.fitBounds(bounds, { 
+            padding: [50, 50], // Padding lớn hơn để có không gian
+            maxZoom: 16, // Giới hạn zoom tối đa để nhìn rõ đường
+            minZoom: 13, // Giới hạn zoom tối thiểu để xem tổng quan
+            animate: true // Thêm animation mượt mà
+          });
+        }
+        
+        // Tự động tìm mục tiêu gần khi vẽ xong đường
+        if (currentRoute.length === 2) {
+          setTimeout(() => {
+            checkNearbyTargets();
+            updateStatus('Đã tự động tìm mục tiêu gần tuyến đường');
+          }, 500);
+        }
+      }
+      
+      updateRouteInfo();
+    });
+    
+    // Hàm ẩn/hiện legend
+    function toggleLegend() {
+      const legendContent = document.getElementById('legendContent');
+      const toggleBtn = document.querySelector('#legend button');
+      
+      if (legendContent.style.display === 'none') {
+        legendContent.style.display = 'block';
+        toggleBtn.textContent = '👁️';
+        toggleBtn.title = 'Ẩn chú thích';
+      } else {
+        legendContent.style.display = 'none';
+        toggleBtn.textContent = '👁️‍🗨️';
+        toggleBtn.title = 'Hiện chú thích';
+      }
+    }
+    
+    // Hàm cập nhật vị trí label khi zoom thay đổi
+    function updateLabelPositions() {
+      const zoom = map.getZoom();
+      const scale = Math.max(0.5, Math.min(2, zoom / 15)); // Scale từ 0.5 đến 2 dựa trên zoom
+      
+      // Cập nhật tất cả label icon
+      document.querySelectorAll('.label-icon div').forEach(label => {
+        const currentTransform = label.style.transform;
+        const baseTransform = currentTransform.replace(/scale\([^)]*\)/g, '').trim();
+        label.style.transform = `${baseTransform} scale(${scale})`;
+      });
+    }
+    
+    // Hàm bật/tắt chế độ tự động hiển thị mục tiêu
+    function toggleAutoShowTargets() {
+      autoShowTargets = !autoShowTargets;
+      const btn = document.getElementById('autoShowBtn');
+      
+      if (autoShowTargets) {
+        btn.textContent = '🔍 Tự động hiển thị mục tiêu';
+        btn.classList.remove('btn-warning');
+        btn.classList.add('btn-info');
+        updateStatus('Đã bật chế độ tự động hiển thị mục tiêu');
+      } else {
+        btn.textContent = '🔍 Tự động hiển thị mục tiêu (TẮT)';
+        btn.classList.remove('btn-info');
+        btn.classList.add('btn-warning');
+        updateStatus('Đã tắt chế độ tự động hiển thị mục tiêu');
+      }
+    }
+    
+    // Hàm hiển thị tổng quan mục tiêu
+    function showTargetsOverview() {
+      const center = map.getCenter();
+      const zoom = map.getZoom();
+      
+      // Tính khoảng cách từ trung tâm bản đồ đến các mục tiêu
+      const targetsWithDistance = targets.map(target => {
+        const distance = calculateDistanceBetweenPoints([center.lat, center.lng], target.coords);
+        return {
+          ...target,
+          distanceFromCenter: distance
+        };
+      }).sort((a, b) => a.distanceFromCenter - b.distanceFromCenter);
+      
+      // Tạo popup với thông tin tổng quan
+      const overviewContent = `
+        <div style="min-width: 350px; max-height: 400px; overflow-y: auto;">
+          <h4 style="margin: 0 0 15px 0; color: #007cbf; border-bottom: 2px solid #007cbf; padding-bottom: 8px;">
+            📊 Tổng quan mục tiêu (${targets.length} mục tiêu)
+          </h4>
+          
+          <div style="margin-bottom: 15px; padding: 10px; background: #f8f9fa; border-radius: 5px;">
+            <p style="margin: 5px 0; font-size: 13px;"><strong>📍 Trung tâm bản đồ:</strong> ${center.lat.toFixed(6)}, ${center.lng.toFixed(6)}</p>
+            <p style="margin: 5px 0; font-size: 13px;"><strong>🔍 Mức zoom:</strong> ${zoom}</p>
+            <p style="margin: 5px 0; font-size: 13px;"><strong>📏 Khoảng cách gần nhất:</strong> ${(targetsWithDistance[0].distanceFromCenter / 1000).toFixed(2)} km</p>
+          </div>
+          
+          <div style="max-height: 250px; overflow-y: auto;">
+            <h5 style="margin: 0 0 10px 0; color: #333;">🎯 Mục tiêu gần trung tâm:</h5>
+            ${targetsWithDistance.slice(0, 10).map((target, index) => `
+              <div style="display: flex; justify-content: space-between; align-items: center; padding: 5px; margin: 2px 0; background: ${index < 3 ? '#e8f4fd' : '#f8f9fa'}; border-radius: 3px; border-left: 3px solid ${index < 3 ? '#007cbf' : '#ddd'};">
+                <div>
+                  <div style="font-weight: 600; font-size: 12px;">${target.name}</div>
+                  <div style="font-size: 11px; color: #666;">${target.coords[0].toFixed(6)}, ${target.coords[1].toFixed(6)}</div>
+                </div>
+                <div style="font-size: 11px; color: #007cbf; font-weight: 600;">
+                  ${(target.distanceFromCenter / 1000).toFixed(2)} km
+                </div>
+              </div>
+            `).join('')}
+          </div>
+          
+          <div style="margin-top: 10px; padding: 8px; background: #fff3cd; border-radius: 3px; font-size: 11px; color: #856404;">
+            💡 <strong>Mẹo:</strong> Click vào mục tiêu để xem chi tiết. Sử dụng nút "🔍 Tìm mục tiêu gần" để tìm mục tiêu gần tuyến đường.
+          </div>
+        </div>
+      `;
+      
+      // Hiển thị popup
+      L.popup({
+        maxWidth: 400,
+        maxHeight: 500
+      })
+      .setLatLng(center)
+      .setContent(overviewContent)
+      .openOn(map);
+      
+      updateStatus(`Đã hiển thị tổng quan ${targets.length} mục tiêu`);
+    }
+    
+    // Hàm điều chỉnh view để xem tổng quan
+    function fitToOverview() {
+      // Tính bounds bao quanh tất cả mục tiêu
+      const targetCoords = targets.map(target => target.coords);
+      const bounds = L.latLngBounds(targetCoords);
+      
+      // Thêm padding và điều chỉnh view để nhìn rõ đường
+      map.fitBounds(bounds, {
+        padding: [100, 100], // Padding lớn hơn để có không gian
+        maxZoom: 14, // Zoom tối đa để nhìn rõ đường phố
+        minZoom: 11 // Zoom tối thiểu để xem tổng quan
+      });
+      
+      updateStatus('Đã điều chỉnh view để xem tổng quan với đường phố rõ ràng');
+    }
+    
+    // Hàm điều chỉnh view để xem tuyến đường
+    function fitToRoute() {
+      if (currentRoute.length >= 2) {
+        const bounds = L.latLngBounds(currentRoute);
+        const maxZoom = detailViewMode ? 18 : 16; // Zoom cao hơn nếu ở chế độ chi tiết
+        map.fitBounds(bounds, {
+          padding: [50, 50],
+          maxZoom: maxZoom
+        });
+        updateStatus(`Đã điều chỉnh view để xem ${detailViewMode ? 'chi tiết' : 'tổng quan'} tuyến đường`);
+      } else {
+        alert('Chưa có tuyến đường để xem!');
+      }
+    }
+    
+    // Hàm reset view về mặc định
+    function resetView() {
+      map.setView([21.0365, 105.8341], 15);
+      updateStatus('Đã reset view về mặc định (tổng quan)');
+    }
+    
+    // Hàm hoàn thành tuyến đường
+    function completeRoute() {
+      if (currentRoute.length < 2) {
+        alert('Vui lòng vẽ ít nhất 2 điểm để hoàn thành tuyến đường!');
+        return;
+      }
+      
+      // Tự động điều chỉnh view để bao quanh toàn bộ tuyến đường
+      const bounds = L.latLngBounds(currentRoute);
+      map.fitBounds(bounds, {
+        padding: [50, 50],
+        maxZoom: 16,
+        animate: true
+      });
+      
+      // Tính toán thông tin tuyến đường
+      const distance = calculateDistance(currentRoute);
+      const duration = Math.round(distance * 3); // Ước tính thời gian (phút)
+      
+      // Hiển thị thông tin chi tiết
+      const routeInfo = `
+        <div style="min-width: 300px; padding: 10px;">
+          <h4 style="margin: 0 0 10px 0; color: #28a745; border-bottom: 2px solid #28a745; padding-bottom: 5px;">
+            ✅ Tuyến đường hoàn thành
+          </h4>
+          <p style="margin: 8px 0;"><strong>📏 Tổng khoảng cách:</strong> ${distance.toFixed(2)} km</p>
+          <p style="margin: 8px 0;"><strong>⏱️ Thời gian ước tính:</strong> ~${duration} phút</p>
+          <p style="margin: 8px 0;"><strong>📍 Số điểm:</strong> ${currentRoute.length}</p>
+          <p style="margin: 8px 0;"><strong>🎯 Điểm bắt đầu:</strong> ${document.getElementById('startPoint').value || 'Chưa đặt tên'}</p>
+          <p style="margin: 8px 0;"><strong>🏁 Điểm kết thúc:</strong> ${document.getElementById('endPoint').value || 'Chưa đặt tên'}</p>
+          <div style="margin-top: 15px; padding: 10px; background: #d4edda; border-radius: 5px; border-left: 4px solid #28a745;">
+            <strong>💡 Gợi ý:</strong><br>
+            • Sử dụng "💾 Lưu tuyến hiện tại" để lưu tuyến đường<br>
+            • Sử dụng "🔍 Tìm mục tiêu gần" để tìm mục tiêu dọc tuyến<br>
+            • Sử dụng "📄 Xuất JSON" để xuất dữ liệu
+          </div>
+        </div>
+      `;
+      
+      // Hiển thị popup thông tin
+      L.popup({
+        maxWidth: 400,
+        maxHeight: 500
+      })
+      .setLatLng(currentRoute[Math.floor(currentRoute.length / 2)]) // Hiển thị ở giữa tuyến
+      .setContent(routeInfo)
+      .openOn(map);
+      
+      updateStatus(`✅ Đã hoàn thành tuyến đường: ${distance.toFixed(2)} km, ${currentRoute.length} điểm`);
+    }
+    
+    // Hàm chỉnh sửa tuyến đường
+    function editRoute() {
+      if (currentRoute.length < 2) {
+        alert('Chưa có tuyến đường để chỉnh sửa!');
+        return;
+      }
+      
+      // Bật chế độ vẽ để chỉnh sửa
+      if (!isDrawingMode) {
+        toggleDrawMode();
+      }
+      
+      // Zoom vào tuyến đường để dễ chỉnh sửa
+      const bounds = L.latLngBounds(currentRoute);
+      map.fitBounds(bounds, {
+        padding: [30, 30],
+        maxZoom: 18,
+        animate: true
+      });
+      
+      updateStatus('✏️ Đã bật chế độ chỉnh sửa - Click để thêm điểm mới vào tuyến đường');
+    }
+    
+    // Hàm hiển thị thống kê tuyến đường
+    function showRouteStats() {
+      if (currentRoute.length < 2) {
+        alert('Chưa có tuyến đường để thống kê!');
+        return;
+      }
+      
+      const distance = calculateDistance(currentRoute);
+      const duration = Math.round(distance * 3);
+      const avgSpeed = 20; // km/h
+      const fuelConsumption = (distance * 0.1).toFixed(2); // L/100km
+      
+      // Tính toán các thống kê chi tiết
+      const segments = [];
+      for (let i = 1; i < currentRoute.length; i++) {
+        const segmentDistance = calculateDistanceBetweenPoints(currentRoute[i-1], currentRoute[i]);
+        segments.push({
+          from: i,
+          to: i + 1,
+          distance: segmentDistance / 1000 // km
+        });
+      }
+      
+      const longestSegment = segments.reduce((max, seg) => seg.distance > max.distance ? seg : max);
+      const shortestSegment = segments.reduce((min, seg) => seg.distance < min.distance ? seg : min);
+      
+      const statsContent = `
+        <div style="min-width: 350px; max-height: 500px; overflow-y: auto;">
+          <h4 style="margin: 0 0 15px 0; color: #17a2b8; border-bottom: 2px solid #17a2b8; padding-bottom: 8px;">
+            📊 Thống kê tuyến đường
+          </h4>
+          
+          <div style="margin-bottom: 15px; padding: 10px; background: #e3f2fd; border-radius: 5px;">
+            <h5 style="margin: 0 0 10px 0; color: #1565c0;">📏 Thông tin cơ bản</h5>
+            <p style="margin: 5px 0;"><strong>Tổng khoảng cách:</strong> ${distance.toFixed(2)} km</p>
+            <p style="margin: 5px 0;"><strong>Thời gian ước tính:</strong> ~${duration} phút</p>
+            <p style="margin: 5px 0;"><strong>Số điểm:</strong> ${currentRoute.length}</p>
+            <p style="margin: 5px 0;"><strong>Số đoạn:</strong> ${currentRoute.length - 1}</p>
+          </div>
+          
+          <div style="margin-bottom: 15px; padding: 10px; background: #f3e5f5; border-radius: 5px;">
+            <h5 style="margin: 0 0 10px 0; color: #7b1fa2;">🚗 Thông tin di chuyển</h5>
+            <p style="margin: 5px 0;"><strong>Tốc độ trung bình:</strong> ${avgSpeed} km/h</p>
+            <p style="margin: 5px 0;"><strong>Tiêu thụ nhiên liệu:</strong> ~${fuelConsumption}L</p>
+            <p style="margin: 5px 0;"><strong>Đoạn dài nhất:</strong> ${longestSegment.distance.toFixed(2)} km (${longestSegment.from}→${longestSegment.to})</p>
+            <p style="margin: 5px 0;"><strong>Đoạn ngắn nhất:</strong> ${shortestSegment.distance.toFixed(2)} km (${shortestSegment.from}→${shortestSegment.to})</p>
+          </div>
+          
+          <div style="margin-bottom: 15px; padding: 10px; background: #e8f5e8; border-radius: 5px;">
+            <h5 style="margin: 0 0 10px 0; color: #2e7d32;">🎯 Điểm quan trọng</h5>
+            <p style="margin: 5px 0;"><strong>Điểm bắt đầu:</strong> ${document.getElementById('startPoint').value || 'Chưa đặt tên'}</p>
+            <p style="margin: 5px 0;"><strong>Điểm kết thúc:</strong> ${document.getElementById('endPoint').value || 'Chưa đặt tên'}</p>
+            <p style="margin: 5px 0;"><strong>Điểm trung gian:</strong> ${currentRoute.length - 2}</p>
+          </div>
+          
+          <div style="padding: 10px; background: #fff3cd; border-radius: 5px; border-left: 4px solid #ffc107;">
+            <strong>💡 Gợi ý:</strong><br>
+            • Sử dụng "🚀 Tối ưu tuyến" để tối ưu hóa tuyến đường<br>
+            • Sử dụng "🔍 Tìm mục tiêu gần" để tìm điểm dừng<br>
+            • Sử dụng "💾 Lưu tuyến hiện tại" để lưu tuyến đường
+          </div>
+        </div>
+      `;
+      
+      // Hiển thị popup thống kê
+      L.popup({
+        maxWidth: 400,
+        maxHeight: 600
+      })
+      .setLatLng(currentRoute[Math.floor(currentRoute.length / 2)])
+      .setContent(statsContent)
+      .openOn(map);
+      
+      updateStatus(`📊 Đã hiển thị thống kê tuyến đường: ${distance.toFixed(2)} km, ${currentRoute.length} điểm`);
+    }
+    
+    // Hàm tối ưu tuyến đường
+    function optimizeRoute() {
+      if (currentRoute.length < 3) {
+        alert('Cần ít nhất 3 điểm để tối ưu tuyến đường!');
+        return;
+      }
+      
+      // Thuật toán tối ưu đơn giản - sắp xếp lại các điểm trung gian
+      const startPoint = currentRoute[0];
+      const endPoint = currentRoute[currentRoute.length - 1];
+      const middlePoints = currentRoute.slice(1, -1);
+      
+      // Sắp xếp các điểm trung gian theo khoảng cách từ điểm bắt đầu
+      middlePoints.sort((a, b) => {
+        const distA = calculateDistanceBetweenPoints(startPoint, a);
+        const distB = calculateDistanceBetweenPoints(startPoint, b);
+        return distA - distB;
+      });
+      
+      // Tạo tuyến đường tối ưu
+      const optimizedRoute = [startPoint, ...middlePoints, endPoint];
+      
+      // Cập nhật tuyến đường hiện tại
+      currentRoute = [...optimizedRoute];
+      
+      // Vẽ lại tuyến đường
+      if (routePolyline) {
+        map.removeLayer(routePolyline);
+      }
+      
+      const selectedColor = document.getElementById('routeColor').value;
+      routePolyline = L.polyline(currentRoute, {
+        color: selectedColor,
+        weight: 6,
+        opacity: 0.9,
+        smoothFactor: 1,
+        dashArray: '15, 5', // Dotted line để phân biệt tuyến đã tối ưu
+        lineCap: 'round',
+        lineJoin: 'round'
+      }).addTo(map);
+      
+      // Cập nhật markers
+      routeMarkers.forEach(marker => map.removeLayer(marker));
+      routeMarkers = [];
+      
+      currentRoute.forEach((coord, index) => {
+        const marker = L.circleMarker(coord, {
+          radius: index === 0 ? 8 : (index === currentRoute.length - 1 ? 8 : 4),
+          fillColor: index === 0 ? '#28a745' : (index === currentRoute.length - 1 ? '#dc3545' : '#007cbf'),
+          color: index === 0 ? '#1e7e34' : (index === currentRoute.length - 1 ? '#c82333' : '#005a8b'),
+          weight: 2,
+          opacity: 1,
+          fillOpacity: 0.8
+        }).addTo(map);
+        
+        routeMarkers.push(marker);
+      });
+      
+      // Điều chỉnh view
+      const bounds = L.latLngBounds(currentRoute);
+      map.fitBounds(bounds, {
+        padding: [50, 50],
+        maxZoom: 16,
+        animate: true
+      });
+      
+      const originalDistance = calculateDistance(currentRoute);
+      updateStatus(`🚀 Đã tối ưu tuyến đường: ${originalDistance.toFixed(2)} km, ${currentRoute.length} điểm (dotted line)`);
+    }
+    
+    // Hàm hiển thị tất cả tuyến đường
+    function showAllRoutes() {
+      if (allRoutes.length === 0) {
+        alert('Chưa có tuyến đường nào được lưu!');
+        return;
+      }
+      
+      // Xóa các polyline cũ
+      hideAllRoutes();
+      
+      // Hiển thị tất cả tuyến đường với màu sắc khác nhau
+      allRoutes.forEach((route, index) => {
+        const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#feca57', '#ff9ff3', '#54a0ff', '#5f27cd', '#ff9f43', '#10ac84'];
+        const routeColor = colors[index % colors.length];
+        
+        // Tạo polyline cho tuyến đường
+        const polyline = L.polyline(route.coordinates, {
+          color: routeColor,
+          weight: 4,
+          opacity: 0.8,
+          smoothFactor: 1,
+          dashArray: '8, 4', // Dotted line để phân biệt với tuyến hiện tại
+          lineCap: 'round',
+          lineJoin: 'round'
+        }).addTo(map);
+        
+        // Thêm popup cho tuyến đường
+        polyline.bindPopup(`
+          <div style="min-width: 280px; padding: 8px;">
+            <h4 style="margin: 0 0 8px 0; color: ${routeColor}; border-bottom: 2px solid ${routeColor}; padding-bottom: 5px;">
+              🛣️ ${route.name}
+            </h4>
+            <p style="margin: 6px 0;"><strong>🎯 Điểm bắt đầu:</strong> ${route.startPoint}</p>
+            <p style="margin: 6px 0;"><strong>🏁 Điểm kết thúc:</strong> ${route.endPoint}</p>
+            <p style="margin: 6px 0;"><strong>📏 Khoảng cách:</strong> ${route.distance.toFixed(2)} km</p>
+            <p style="margin: 6px 0;"><strong>📍 Số điểm:</strong> ${route.coordinates.length}</p>
+            <p style="margin: 6px 0;"><strong>🏷️ Tên khối:</strong> ${route.blockName}</p>
+            <p style="margin: 6px 0;"><strong>🚗 Loại:</strong> ${route.routeType}</p>
+            <p style="margin: 6px 0;"><strong>📅 Ngày tạo:</strong> ${new Date(route.timestamp).toLocaleString()}</p>
+            <div style="margin-top: 10px; padding: 8px; background: #f8f9fa; border-radius: 4px; font-size: 12px; color: #666;">
+              <strong>💡 Tip:</strong> Click vào tuyến để xem chi tiết. Sử dụng selector để chuyển đổi tuyến.
+            </div>
+          </div>
+        `);
+        
+        // Thêm markers cho điểm bắt đầu và kết thúc
+        const startMarker = L.circleMarker(route.coordinates[0], {
+          radius: 6,
+          fillColor: '#28a745',
+          color: '#1e7e34',
+          weight: 2,
+          opacity: 1,
+          fillOpacity: 0.8
+        }).addTo(map).bindPopup(`🎯 Bắt đầu: ${route.startPoint}`);
+        
+        const endMarker = L.circleMarker(route.coordinates[route.coordinates.length - 1], {
+          radius: 6,
+          fillColor: '#dc3545',
+          color: '#c82333',
+          weight: 2,
+          opacity: 1,
+          fillOpacity: 0.8
+        }).addTo(map).bindPopup(`🏁 Kết thúc: ${route.endPoint}`);
+        
+        allRoutePolylines.push(polyline, startMarker, endMarker);
+      });
+      
+      allRoutesVisible = true;
+      
+      // Điều chỉnh view để bao quanh tất cả tuyến đường
+      const allCoords = allRoutes.flatMap(route => route.coordinates);
+      const bounds = L.latLngBounds(allCoords);
+      map.fitBounds(bounds, {
+        padding: [50, 50],
+        maxZoom: 15,
+        animate: true
+      });
+      
+      updateStatus(`🗺️ Đã hiển thị ${allRoutes.length} tuyến đường với màu sắc khác nhau`);
+    }
+    
+    // Hàm ẩn tất cả tuyến đường
+    function hideAllRoutes() {
+      allRoutePolylines.forEach(polyline => map.removeLayer(polyline));
+      allRoutePolylines = [];
+      allRoutesVisible = false;
+      updateStatus('🙈 Đã ẩn tất cả tuyến đường');
+    }
+    
+    // Hàm hiển thị tổng quan tất cả tuyến đường
+    function showRoutesOverview() {
+      if (allRoutes.length === 0) {
+        alert('Chưa có tuyến đường nào để xem tổng quan!');
+        return;
+      }
+      
+      // Tính toán thống kê tổng quan
+      const totalDistance = allRoutes.reduce((sum, route) => sum + route.distance, 0);
+      const totalPoints = allRoutes.reduce((sum, route) => sum + route.coordinates.length, 0);
+      const avgDistance = totalDistance / allRoutes.length;
+      const avgPoints = totalPoints / allRoutes.length;
+      
+      // Tìm tuyến đường dài nhất và ngắn nhất
+      const longestRoute = allRoutes.reduce((max, route) => route.distance > max.distance ? route : max);
+      const shortestRoute = allRoutes.reduce((min, route) => route.distance < min.distance ? route : min);
+      
+      // Thống kê theo loại tuyến đường
+      const routeTypes = {};
+      allRoutes.forEach(route => {
+        routeTypes[route.routeType] = (routeTypes[route.routeType] || 0) + 1;
+      });
+      
+      // Thống kê theo khối
+      const blockNames = {};
+      allRoutes.forEach(route => {
+        const blockName = route.blockName || 'Không có tên khối';
+        blockNames[blockName] = (blockNames[blockName] || 0) + 1;
+      });
+      
+      const overviewContent = `
+        <div style="min-width: 400px; max-height: 600px; overflow-y: auto;">
+          <h4 style="margin: 0 0 15px 0; color: #17a2b8; border-bottom: 2px solid #17a2b8; padding-bottom: 8px;">
+            📊 Tổng quan tuyến đường (${allRoutes.length} tuyến)
+          </h4>
+          
+          <div style="margin-bottom: 15px; padding: 10px; background: #e3f2fd; border-radius: 5px;">
+            <h5 style="margin: 0 0 10px 0; color: #1565c0;">📏 Thống kê tổng quan</h5>
+            <p style="margin: 5px 0;"><strong>Tổng khoảng cách:</strong> ${totalDistance.toFixed(2)} km</p>
+            <p style="margin: 5px 0;"><strong>Tổng số điểm:</strong> ${totalPoints}</p>
+            <p style="margin: 5px 0;"><strong>Khoảng cách trung bình:</strong> ${avgDistance.toFixed(2)} km</p>
+            <p style="margin: 5px 0;"><strong>Số điểm trung bình:</strong> ${avgPoints.toFixed(1)}</p>
+          </div>
+          
+          <div style="margin-bottom: 15px; padding: 10px; background: #f3e5f5; border-radius: 5px;">
+            <h5 style="margin: 0 0 10px 0; color: #7b1fa2;">🏆 Tuyến đường đặc biệt</h5>
+            <p style="margin: 5px 0;"><strong>Dài nhất:</strong> ${longestRoute.name} (${longestRoute.distance.toFixed(2)} km)</p>
+            <p style="margin: 5px 0;"><strong>Ngắn nhất:</strong> ${shortestRoute.name} (${shortestRoute.distance.toFixed(2)} km)</p>
+            <p style="margin: 5px 0;"><strong>Nhiều điểm nhất:</strong> ${allRoutes.reduce((max, route) => route.coordinates.length > max.coordinates.length ? route : max).name} (${allRoutes.reduce((max, route) => route.coordinates.length > max.coordinates.length ? route : max).coordinates.length} điểm)</p>
+          </div>
+          
+          <div style="margin-bottom: 15px; padding: 10px; background: #e8f5e8; border-radius: 5px;">
+            <h5 style="margin: 0 0 10px 0; color: #2e7d32;">🚗 Phân loại theo loại tuyến</h5>
+            ${Object.entries(routeTypes).map(([type, count]) => 
+              `<p style="margin: 5px 0;"><strong>${type}:</strong> ${count} tuyến</p>`
+            ).join('')}
+          </div>
+          
+          <div style="margin-bottom: 15px; padding: 10px; background: #fff3cd; border-radius: 5px;">
+            <h5 style="margin: 0 0 10px 0; color: #856404;">🏷️ Phân loại theo khối</h5>
+            ${Object.entries(blockNames).map(([block, count]) => 
+              `<p style="margin: 5px 0;"><strong>${block}:</strong> ${count} tuyến</p>`
+            ).join('')}
+          </div>
+          
+          <div style="padding: 10px; background: #f8d7da; border-radius: 5px; border-left: 4px solid #dc3545;">
+            <strong>💡 Gợi ý:</strong><br>
+            • Sử dụng "🗺️ Hiển thị tất cả tuyến" để xem trên bản đồ<br>
+            • Sử dụng "⚖️ So sánh tuyến" để so sánh chi tiết<br>
+            • Sử dụng "📄 Xuất JSON" để xuất dữ liệu
+          </div>
+        </div>
+      `;
+      
+      // Hiển thị popup tổng quan
+      L.popup({
+        maxWidth: 450,
+        maxHeight: 700
+      })
+      .setLatLng(map.getCenter())
+      .setContent(overviewContent)
+      .openOn(map);
+      
+      updateStatus(`📊 Đã hiển thị tổng quan ${allRoutes.length} tuyến đường`);
+    }
+    
+    // Hàm so sánh tuyến đường
+    function compareRoutes() {
+      if (allRoutes.length < 2) {
+        alert('Cần ít nhất 2 tuyến đường để so sánh!');
+        return;
+      }
+      
+      // Tạo bảng so sánh
+      const compareContent = `
+        <div style="min-width: 500px; max-height: 600px; overflow-y: auto;">
+          <h4 style="margin: 0 0 15px 0; color: #6f42c1; border-bottom: 2px solid #6f42c1; padding-bottom: 8px;">
+            ⚖️ So sánh tuyến đường (${allRoutes.length} tuyến)
+          </h4>
+          
+          <div style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse; font-size: 12px;">
+              <thead>
+                <tr style="background: #6f42c1; color: white;">
+                  <th style="padding: 8px; border: 1px solid #ddd; text-align: left;">Tên tuyến</th>
+                  <th style="padding: 8px; border: 1px solid #ddd; text-align: center;">Khoảng cách</th>
+                  <th style="padding: 8px; border: 1px solid #ddd; text-align: center;">Số điểm</th>
+                  <th style="padding: 8px; border: 1px solid #ddd; text-align: center;">Loại</th>
+                  <th style="padding: 8px; border: 1px solid #ddd; text-align: center;">Khối</th>
+                  <th style="padding: 8px; border: 1px solid #ddd; text-align: center;">Ngày tạo</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${allRoutes.map((route, index) => `
+                  <tr style="background: ${index % 2 === 0 ? '#f8f9fa' : '#ffffff'};">
+                    <td style="padding: 8px; border: 1px solid #ddd; font-weight: bold; color: #6f42c1;">${route.name}</td>
+                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">${route.distance.toFixed(2)} km</td>
+                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">${route.coordinates.length}</td>
+                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">${route.routeType}</td>
+                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">${route.blockName || '-'}</td>
+                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">${new Date(route.timestamp).toLocaleDateString()}</td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+          
+          <div style="margin-top: 15px; padding: 10px; background: #e3f2fd; border-radius: 5px;">
+            <h5 style="margin: 0 0 10px 0; color: #1565c0;">📊 Thống kê so sánh</h5>
+            <p style="margin: 5px 0;"><strong>Tuyến dài nhất:</strong> ${allRoutes.reduce((max, route) => route.distance > max.distance ? route : max).name} (${allRoutes.reduce((max, route) => route.distance > max.distance ? route : max).distance.toFixed(2)} km)</p>
+            <p style="margin: 5px 0;"><strong>Tuyến ngắn nhất:</strong> ${allRoutes.reduce((min, route) => route.distance < min.distance ? route : min).name} (${allRoutes.reduce((min, route) => route.distance < min.distance ? route : min).distance.toFixed(2)} km)</p>
+            <p style="margin: 5px 0;"><strong>Chênh lệch:</strong> ${(allRoutes.reduce((max, route) => route.distance > max.distance ? route : max).distance - allRoutes.reduce((min, route) => route.distance < min.distance ? route : min).distance).toFixed(2)} km</p>
+          </div>
+          
+          <div style="margin-top: 10px; padding: 10px; background: #fff3cd; border-radius: 5px; border-left: 4px solid #ffc107;">
+            <strong>💡 Gợi ý:</strong><br>
+            • Click vào tên tuyến để chuyển đổi và xem chi tiết<br>
+            • Sử dụng "🗺️ Hiển thị tất cả tuyến" để xem trên bản đồ<br>
+            • Sử dụng "📄 Xuất JSON" để xuất dữ liệu so sánh
+          </div>
+        </div>
+      `;
+      
+      // Hiển thị popup so sánh
+      L.popup({
+        maxWidth: 600,
+        maxHeight: 700
+      })
+      .setLatLng(map.getCenter())
+      .setContent(compareContent)
+      .openOn(map);
+      
+      updateStatus(`⚖️ Đã hiển thị so sánh ${allRoutes.length} tuyến đường`);
+    }
+    
+    // Hàm bật/tắt chế độ xem chi tiết
+    function toggleDetailView() {
+      detailViewMode = !detailViewMode;
+      const btn = document.getElementById('detailViewBtn');
+      
+      if (detailViewMode) {
+        btn.textContent = '🔍 Chế độ chi tiết (BẬT)';
+        btn.classList.remove('btn-success');
+        btn.classList.add('btn-warning');
+        map.setZoom(17);
+        updateStatus('Đã bật chế độ xem chi tiết - Zoom cao hơn');
+      } else {
+        btn.textContent = '🔍 Chế độ chi tiết';
+        btn.classList.remove('btn-warning');
+        btn.classList.add('btn-success');
+        map.setZoom(15);
+        updateStatus('Đã tắt chế độ xem chi tiết - Zoom tổng quan');
+      }
+    }
+    
+    // Hàm bật/tắt chế độ hiển thị đường phố rõ ràng
+    function toggleStreetView() {
+      streetViewMode = !streetViewMode;
+      const btn = document.getElementById('streetViewBtn');
+      
+      if (streetViewMode) {
+        btn.textContent = '🛣️ Hiển thị đường phố rõ ràng (BẬT)';
+        btn.classList.remove('btn-primary');
+        btn.classList.add('btn-success');
+        map.setZoom(14); // Zoom để nhìn rõ đường phố
+        updateStatus('Đã bật chế độ hiển thị đường phố rõ ràng');
+      } else {
+        btn.textContent = '🛣️ Hiển thị đường phố rõ ràng';
+        btn.classList.remove('btn-success');
+        btn.classList.add('btn-primary');
+        map.setZoom(12); // Zoom xa hơn để xem tổng quan
+        updateStatus('Đã tắt chế độ hiển thị đường phố rõ ràng');
+      }
+    }
+    
+    // Khởi tạo
+    updateStatus('Sẵn sàng vẽ tuyến đường');
+    loadRoutesFromStorage(); // Tải dữ liệu từ localStorage khi khởi động
+    
+    // Khởi tạo mặc định không hiển thị mục tiêu
+    setTimeout(() => {
+      // Mặc định bật chế độ hiển thị đường phố rõ ràng
+      const streetBtn = document.getElementById('streetViewBtn');
+      streetBtn.textContent = '🛣️ Hiển thị đường phố rõ ràng (BẬT)';
+      streetBtn.classList.remove('btn-primary');
+      streetBtn.classList.add('btn-success');
+      
+      updateStatus('Sẵn sàng vẽ tuyến đường - Mục tiêu sẽ hiển thị khi tìm kiếm');
+    }, 1000);
+    
+    // Thêm event listener cho zoom để cập nhật label
+    map.on('zoomend', updateLabelPositions);
+    map.on('moveend', updateLabelPositions);
   </script>
 </body>
 </html>
