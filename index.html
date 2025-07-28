@@ -667,6 +667,53 @@
       <button class="btn btn-secondary" onclick="resetView()">🏠 Reset view</button>
     </div>
     
+    <!-- Section nhập targets -->
+    <div style="margin: 15px 0; padding: 15px; background: #f8f9fa; border-radius: 8px; border-left: 4px solid #28a745;">
+      <h4 style="margin: 0 0 10px 0; color: #28a745; font-size: 14px;">🎯 Quản lý Targets</h4>
+      
+      <div class="input-group">
+        <label>Tên target:</label>
+        <input type="text" id="targetName" placeholder="Nhập tên target">
+      </div>
+      
+      <div class="input-group">
+        <label>Vĩ độ:</label>
+        <input type="number" id="targetLat" placeholder="Ví dụ: 21.0365" step="0.000001">
+      </div>
+      
+      <div class="input-group">
+        <label>Kinh độ:</label>
+        <input type="number" id="targetLng" placeholder="Ví dụ: 105.8341" step="0.000001">
+        <button type="button" class="btn btn-info" style="margin-top: 5px; width: 100%;" onclick="getCoordinatesFromMap()">📍 Lấy tọa độ từ bản đồ</button>
+      </div>
+      
+      <div class="button-group">
+        <button class="btn btn-success" onclick="addTarget()">➕ Thêm Target</button>
+        <button class="btn btn-warning" onclick="clearTargetForm()">🗑️ Xóa Form</button>
+      </div>
+      
+      <div class="button-group">
+        <button class="btn btn-info" onclick="importTargetsFromFile()">📂 Nhập từ File</button>
+        <button class="btn btn-primary" onclick="exportTargetsToFile()">💾 Xuất Targets</button>
+      </div>
+      
+      <div class="button-group">
+        <button class="btn btn-danger" onclick="clearAllTargets()">🗑️ Xóa tất cả Targets</button>
+      </div>
+      
+      <div class="input-group">
+        <label id="targetSelectorLabel">Danh sách Targets (0):</label>
+        <select id="targetSelector" onchange="selectTarget()" style="max-height: 100px;">
+          <option value="-1">-- Chọn target để xem/sửa --</option>
+        </select>
+      </div>
+      
+      <div class="button-group">
+        <button class="btn btn-warning" onclick="editSelectedTarget()">✏️ Sửa Target</button>
+        <button class="btn btn-danger" onclick="deleteSelectedTarget()">🗑️ Xóa Target</button>
+      </div>
+    </div>
+    
     <!-- Nút mới cho biểu tượng người di chuyển -->
     <div class="button-group">
       <button class="btn btn-info" onclick="togglePersonAnimation()" id="personBtn">👥 Hiển thị người di chuyển</button>
@@ -2915,6 +2962,8 @@
     // Khởi tạo
     updateStatus('Sẵn sàng vẽ tuyến đường');
     loadRoutesFromStorage(); // Tải dữ liệu từ localStorage khi khởi động
+    loadTargetsFromStorage(); // Tải targets từ localStorage khi khởi động
+    updateTargetSelector(); // Cập nhật target selector
     
     // Khởi tạo mặc định không hiển thị mục tiêu
     setTimeout(() => {
@@ -2930,6 +2979,405 @@
     // Thêm event listener cho zoom để cập nhật label
     map.on('zoomend', updateLabelPositions);
     map.on('moveend', updateLabelPositions);
+    
+    // ===== CÁC HÀM QUẢN LÝ TARGETS =====
+    
+    // Hàm thêm target mới
+    function addTarget() {
+      const name = document.getElementById('targetName').value.trim();
+      const lat = parseFloat(document.getElementById('targetLat').value);
+      const lng = parseFloat(document.getElementById('targetLng').value);
+      
+      if (!name) {
+        alert('Vui lòng nhập tên target!');
+        return;
+      }
+      
+      if (isNaN(lat) || isNaN(lng)) {
+        alert('Vui lòng nhập tọa độ hợp lệ!');
+        return;
+      }
+      
+      if (lat < -90 || lat > 90) {
+        alert('Vĩ độ phải từ -90 đến 90!');
+        return;
+      }
+      
+      if (lng < -180 || lng > 180) {
+        alert('Kinh độ phải từ -180 đến 180!');
+        return;
+      }
+      
+      // Kiểm tra trùng lặp
+      const existingTarget = targets.find(t => t.name === name);
+      if (existingTarget) {
+        if (!confirm(`Target "${name}" đã tồn tại. Bạn có muốn cập nhật không?`)) {
+          return;
+        }
+        // Cập nhật target hiện có
+        existingTarget.coords = [lat, lng];
+        updateStatus(`Đã cập nhật target: ${name}`);
+      } else {
+        // Thêm target mới
+        targets.push({
+          name: name,
+          coords: [lat, lng]
+        });
+        updateStatus(`Đã thêm target mới: ${name}`);
+      }
+      
+      // Lưu vào localStorage
+      saveTargetsToStorage();
+      
+      // Cập nhật giao diện
+      updateTargetSelector();
+      clearTargetForm();
+      
+      // Nếu đang hiển thị targets thì vẽ lại
+      if (targetMarkers.length > 0) {
+        showAllTargets();
+      }
+    }
+    
+    // Hàm xóa form target
+    function clearTargetForm() {
+      document.getElementById('targetName').value = '';
+      document.getElementById('targetLat').value = '';
+      document.getElementById('targetLng').value = '';
+      document.getElementById('targetSelector').value = '-1';
+    }
+    
+    // Hàm chọn target từ dropdown
+    function selectTarget() {
+      const selector = document.getElementById('targetSelector');
+      const selectedIndex = parseInt(selector.value);
+      
+      if (selectedIndex === -1) {
+        clearTargetForm();
+        return;
+      }
+      
+      const target = targets[selectedIndex];
+      if (target) {
+        document.getElementById('targetName').value = target.name;
+        document.getElementById('targetLat').value = target.coords[0];
+        document.getElementById('targetLng').value = target.coords[1];
+        
+        // Di chuyển map đến target
+        map.setView(target.coords, 16);
+        
+        updateStatus(`Đã chọn target: ${target.name}`);
+      }
+    }
+    
+    // Hàm sửa target đã chọn
+    function editSelectedTarget() {
+      const selector = document.getElementById('targetSelector');
+      const selectedIndex = parseInt(selector.value);
+      
+      if (selectedIndex === -1) {
+        alert('Vui lòng chọn target để sửa!');
+        return;
+      }
+      
+      const name = document.getElementById('targetName').value.trim();
+      const lat = parseFloat(document.getElementById('targetLat').value);
+      const lng = parseFloat(document.getElementById('targetLng').value);
+      
+      if (!name || isNaN(lat) || isNaN(lng)) {
+        alert('Vui lòng nhập đầy đủ thông tin hợp lệ!');
+        return;
+      }
+      
+      // Cập nhật target
+      targets[selectedIndex] = {
+        name: name,
+        coords: [lat, lng]
+      };
+      
+      // Lưu vào localStorage
+      saveTargetsToStorage();
+      
+      // Cập nhật giao diện
+      updateTargetSelector();
+      clearTargetForm();
+      
+      // Nếu đang hiển thị targets thì vẽ lại
+      if (targetMarkers.length > 0) {
+        showAllTargets();
+      }
+      
+      updateStatus(`Đã cập nhật target: ${name}`);
+    }
+    
+    // Hàm xóa target đã chọn
+    function deleteSelectedTarget() {
+      const selector = document.getElementById('targetSelector');
+      const selectedIndex = parseInt(selector.value);
+      
+      if (selectedIndex === -1) {
+        alert('Vui lòng chọn target để xóa!');
+        return;
+      }
+      
+      const target = targets[selectedIndex];
+      if (confirm(`Bạn có chắc muốn xóa target "${target.name}"?`)) {
+        targets.splice(selectedIndex, 1);
+        
+        // Lưu vào localStorage
+        saveTargetsToStorage();
+        
+        // Cập nhật giao diện
+        updateTargetSelector();
+        clearTargetForm();
+        
+        // Nếu đang hiển thị targets thì vẽ lại
+        if (targetMarkers.length > 0) {
+          showAllTargets();
+        }
+        
+        updateStatus(`Đã xóa target: ${target.name}`);
+      }
+    }
+    
+    // Hàm xóa tất cả targets
+    function clearAllTargets() {
+      if (targets.length === 0) {
+        alert('Không có target nào để xóa!');
+        return;
+      }
+      
+      if (confirm(`Bạn có chắc muốn xóa tất cả ${targets.length} targets?`)) {
+        targets.length = 0;
+        
+        // Lưu vào localStorage
+        saveTargetsToStorage();
+        
+        // Cập nhật giao diện
+        updateTargetSelector();
+        clearTargetForm();
+        
+        // Ẩn tất cả markers
+        hideAllTargets();
+        
+        updateStatus('Đã xóa tất cả targets');
+      }
+    }
+    
+    // Hàm nhập targets từ file
+    function importTargetsFromFile() {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = '.json,.csv';
+      input.onchange = function(e) {
+        const file = e.target.files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = function(e) {
+            try {
+              if (file.name.toLowerCase().endsWith('.json')) {
+                // Xử lý file JSON
+                const data = JSON.parse(e.target.result);
+                let importedTargets = [];
+                
+                if (Array.isArray(data)) {
+                  importedTargets = data;
+                } else if (data.targets && Array.isArray(data.targets)) {
+                  importedTargets = data.targets;
+                } else {
+                  throw new Error('Định dạng JSON không hợp lệ');
+                }
+                
+                // Kiểm tra và thêm targets
+                let addedCount = 0;
+                let updatedCount = 0;
+                
+                importedTargets.forEach(target => {
+                  if (target.name && target.coords && Array.isArray(target.coords) && target.coords.length === 2) {
+                    const existingIndex = targets.findIndex(t => t.name === target.name);
+                    if (existingIndex >= 0) {
+                      targets[existingIndex] = target;
+                      updatedCount++;
+                    } else {
+                      targets.push(target);
+                      addedCount++;
+                    }
+                  }
+                });
+                
+                saveTargetsToStorage();
+                updateTargetSelector();
+                
+                if (targetMarkers.length > 0) {
+                  showAllTargets();
+                }
+                
+                updateStatus(`Đã nhập ${addedCount} targets mới, cập nhật ${updatedCount} targets`);
+                
+              } else if (file.name.toLowerCase().endsWith('.csv')) {
+                // Xử lý file CSV
+                const csvData = e.target.result;
+                const lines = csvData.split('\n');
+                let addedCount = 0;
+                
+                for (let i = 1; i < lines.length; i++) { // Bỏ qua header
+                  const line = lines[i].trim();
+                  if (line) {
+                    const parts = line.split(',');
+                    if (parts.length >= 3) {
+                      const name = parts[0].trim();
+                      const lat = parseFloat(parts[1]);
+                      const lng = parseFloat(parts[2]);
+                      
+                      if (name && !isNaN(lat) && !isNaN(lng)) {
+                        const existingIndex = targets.findIndex(t => t.name === name);
+                        const target = { name, coords: [lat, lng] };
+                        
+                        if (existingIndex >= 0) {
+                          targets[existingIndex] = target;
+                        } else {
+                          targets.push(target);
+                          addedCount++;
+                        }
+                      }
+                    }
+                  }
+                }
+                
+                saveTargetsToStorage();
+                updateTargetSelector();
+                
+                if (targetMarkers.length > 0) {
+                  showAllTargets();
+                }
+                
+                updateStatus(`Đã nhập ${addedCount} targets từ file CSV`);
+              }
+            } catch (error) {
+              alert('Lỗi khi đọc file: ' + error.message);
+              console.error('Chi tiết lỗi:', error);
+            }
+          };
+          reader.readAsText(file);
+        }
+      };
+      input.click();
+    }
+    
+    // Hàm xuất targets ra file
+    function exportTargetsToFile() {
+      if (targets.length === 0) {
+        alert('Không có target nào để xuất!');
+        return;
+      }
+      
+      const exportData = {
+        exportInfo: {
+          application: 'Ứng dụng Vẽ Tuyến đường',
+          version: '2.0',
+          exportDate: new Date().toISOString(),
+          totalTargets: targets.length
+        },
+        targets: targets
+      };
+      
+      const dataStr = JSON.stringify(exportData, null, 2);
+      const dataBlob = new Blob([dataStr], {type: 'application/json'});
+      const url = URL.createObjectURL(dataBlob);
+      
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `targets-export-${new Date().toISOString().split('T')[0]}.json`;
+      link.click();
+      
+      updateStatus(`Đã xuất ${targets.length} targets ra file JSON`);
+    }
+    
+    // Hàm lưu targets vào localStorage
+    function saveTargetsToStorage() {
+      try {
+        localStorage.setItem('savedTargets', JSON.stringify(targets));
+        console.log('Đã lưu targets vào localStorage');
+      } catch (error) {
+        console.error('Lỗi khi lưu targets vào localStorage:', error);
+      }
+    }
+    
+    // Hàm tải targets từ localStorage
+    function loadTargetsFromStorage() {
+      try {
+        const savedTargets = localStorage.getItem('savedTargets');
+        if (savedTargets) {
+          const loadedTargets = JSON.parse(savedTargets);
+          if (Array.isArray(loadedTargets)) {
+            targets.length = 0; // Xóa targets hiện tại
+            targets.push(...loadedTargets); // Thêm targets từ storage
+            updateTargetSelector();
+            updateStatus(`Đã tải ${targets.length} targets từ bộ nhớ`);
+          }
+        }
+      } catch (error) {
+        console.error('Lỗi khi tải targets từ localStorage:', error);
+      }
+    }
+    
+    // Hàm cập nhật target selector
+    function updateTargetSelector() {
+      const selector = document.getElementById('targetSelector');
+      const label = document.getElementById('targetSelectorLabel');
+      
+      // Cập nhật label với số lượng
+      if (label) {
+        label.textContent = `Danh sách Targets (${targets.length}):`;
+      }
+      
+      // Cập nhật dropdown
+      selector.innerHTML = '<option value="-1">-- Chọn target để xem/sửa --</option>';
+      
+      targets.forEach((target, index) => {
+        const option = document.createElement('option');
+        option.value = index;
+        option.textContent = `${target.name} (${target.coords[0].toFixed(6)}, ${target.coords[1].toFixed(6)})`;
+        selector.appendChild(option);
+      });
+    }
+    
+    // Hàm lấy tọa độ từ click trên map
+    function getCoordinatesFromMap() {
+      // Lưu trạng thái vẽ hiện tại
+      const wasDrawingMode = isDrawingMode;
+      
+      // Tạm thời tắt chế độ vẽ nếu đang bật
+      if (isDrawingMode) {
+        toggleDrawMode();
+      }
+      
+      // Tạm thời thay đổi cursor
+      map.getContainer().style.cursor = 'crosshair';
+      
+      // Tạo handler tạm thời
+      const tempClickHandler = function(e) {
+        const latlng = e.latlng;
+        document.getElementById('targetLat').value = latlng.lat.toFixed(6);
+        document.getElementById('targetLng').value = latlng.lng.toFixed(6);
+        
+        // Khôi phục trạng thái ban đầu
+        map.off('click', tempClickHandler);
+        map.getContainer().style.cursor = '';
+        
+        // Khôi phục chế độ vẽ nếu cần
+        if (wasDrawingMode && !isDrawingMode) {
+          toggleDrawMode();
+        }
+        
+        updateStatus(`Đã lấy tọa độ: ${latlng.lat.toFixed(6)}, ${latlng.lng.toFixed(6)}`);
+      };
+      
+      map.on('click', tempClickHandler);
+      updateStatus('Click vào bản đồ để lấy tọa độ cho target');
+    }
+    
+
   </script>
 </body>
 </html>
