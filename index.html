@@ -277,19 +277,32 @@
       border: 2px solid #333;
     }
     
-    /* CSS cho label động */
+    /* CSS cho label cố định */
     .label-icon {
       pointer-events: none;
     }
     
     .label-icon div {
       pointer-events: auto;
-      transition: all 0.3s ease;
+      transition: box-shadow 0.3s ease;
+      /* Đảm bảo label luôn hiển thị rõ ràng */
+      font-size: 12px !important;
+      font-weight: bold !important;
+      white-space: nowrap !important;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.5) !important;
     }
     
     .label-icon div:hover {
-      transform: scale(1.05) !important;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.5) !important;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.6) !important;
+    }
+    
+    /* Responsive cho label trên mobile */
+    @media (max-width: 768px) {
+      .label-icon div {
+        font-size: 10px !important;
+        padding: 4px 8px !important;
+        min-width: 120px !important;
+      }
     }
     
     .status-bar {
@@ -1763,26 +1776,29 @@
             })
           }).addTo(map);
           
-          // Tạo label riêng biệt để có thể điều chỉnh vị trí theo zoom
-          const labelOffset = [
-            { x: 40, y: -8 },   // Phải
-            { x: -40, y: -8 },  // Trái
-            { x: 0, y: 40 },    // Dưới
-            { x: 0, y: -40 },   // Trên
-            { x: 60, y: -20 }   // Chéo phải
+          // Tạo label với vị trí cố định và responsive
+          const labelPositions = [
+            { x: 45, y: -10 },   // Phải trên
+            { x: -45, y: -10 },  // Trái trên  
+            { x: 0, y: 45 },     // Dưới
+            { x: 0, y: -45 },    // Trên
+            { x: 65, y: -15 }    // Chéo phải trên
           ];
           
-          const offset = labelOffset[index % 5];
+          const position = labelPositions[index % 5];
           
-          // Tạo label động
+          // Tạo label với icon anchor cố định
           const label = L.marker(target.coords, {
             icon: L.divIcon({
               className: 'label-icon',
               html: `
-                <div style="background: ${index === 0 ? 'rgba(220,53,69,0.9)' : 'rgba(0,124,191,0.9)'}; color: white; padding: 5px 10px; border-radius: 5px; font-size: 12px; font-weight: bold; white-space: nowrap; min-width: 140px; text-align: center; box-shadow: 0 3px 8px rgba(0,0,0,0.4); border: 2px solid white; transform: translate(${offset.x}px, ${offset.y}px);">${target.name}</div>
+                <div style="background: ${index === 0 ? 'rgba(220,53,69,0.95)' : 'rgba(0,124,191,0.95)'}; color: white; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: bold; white-space: nowrap; min-width: 140px; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.4); border: 2px solid white; text-shadow: 1px 1px 2px rgba(0,0,0,0.5); position: relative; z-index: 1000;">
+                  ${target.name}
+                  <div style="position: absolute; top: 50%; left: ${position.x > 0 ? '-6px' : 'auto'}; right: ${position.x < 0 ? '-6px' : 'auto'}; transform: translateY(-50%); width: 0; height: 0; border-top: 6px solid transparent; border-bottom: 6px solid transparent; border-${position.x > 0 ? 'right' : 'left'}: 6px solid ${index === 0 ? 'rgba(220,53,69,0.95)' : 'rgba(0,124,191,0.95)'};"></div>
+                </div>
               `,
               iconSize: [0, 0],
-              iconAnchor: [0, 0]
+              iconAnchor: [position.x, position.y]
             })
           }).addTo(map);
           
@@ -1865,25 +1881,28 @@
           })
         }).addTo(map);
         
-        // Tạo label riêng biệt với offset động và style rõ ràng hơn
-        const labelOffset = [
-          { x: 40, y: -8 },   // Phải
-          { x: -40, y: -8 },  // Trái
-          { x: 0, y: 40 },    // Dưới
-          { x: 0, y: -40 }    // Trên
+        // Tạo label với vị trí cố định và responsive
+        const labelPositions = [
+          { x: 45, y: -10 },   // Phải trên
+          { x: -45, y: -10 },  // Trái trên  
+          { x: 0, y: 45 },     // Dưới
+          { x: 0, y: -45 }     // Trên
         ];
         
-        const offset = labelOffset[index % 4];
+        const position = labelPositions[index % 4];
         
-        // Tạo label động với style rõ ràng hơn
+        // Tạo label với icon anchor cố định
         const label = L.marker(target.coords, {
           icon: L.divIcon({
             className: 'label-icon',
             html: `
-              <div style="background: linear-gradient(135deg, #dc3545, #c82333); color: white; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: bold; white-space: nowrap; min-width: 140px; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.4); border: 2px solid white; transform: translate(${offset.x}px, ${offset.y}px); text-shadow: 1px 1px 2px rgba(0,0,0,0.5);">${target.name}</div>
+              <div style="background: linear-gradient(135deg, #dc3545, #c82333); color: white; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: bold; white-space: nowrap; min-width: 140px; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.4); border: 2px solid white; text-shadow: 1px 1px 2px rgba(0,0,0,0.5); position: relative; z-index: 1000;">
+                ${target.name}
+                <div style="position: absolute; top: 50%; left: ${position.x > 0 ? '-6px' : 'auto'}; right: ${position.x < 0 ? '-6px' : 'auto'}; transform: translateY(-50%); width: 0; height: 0; border-top: 6px solid transparent; border-bottom: 6px solid transparent; border-${position.x > 0 ? 'right' : 'left'}: 6px solid #dc3545;"></div>
+              </div>
             `,
             iconSize: [0, 0],
-            iconAnchor: [0, 0]
+            iconAnchor: [position.x, position.y]
           })
         }).addTo(map);
         
@@ -2292,15 +2311,13 @@
         if (currentRoute.length >= 2) {
           const bounds = L.latLngBounds(currentRoute);
           map.fitBounds(bounds, { 
-            padding: [50, 50], // Padding lớn hơn để có không gian
+            padding: [50, 50], 
             maxZoom: 16, // Giới hạn zoom tối đa để nhìn rõ đường
             minZoom: 13, // Giới hạn zoom tối thiểu để xem tổng quan
             animate: true // Thêm animation mượt mà
           });
         }
-        
-        // Tự động tìm mục tiêu gần khi vẽ xong đường
-        if (currentRoute.length === 2) {
+                if (currentRoute.length === 2) {
           setTimeout(() => {
             checkNearbyTargets();
             updateStatus('Đã tự động tìm mục tiêu gần tuyến đường');
@@ -2327,18 +2344,7 @@
       }
     }
     
-    // Hàm cập nhật vị trí label khi zoom thay đổi
-    function updateLabelPositions() {
-      const zoom = map.getZoom();
-      const scale = Math.max(0.5, Math.min(2, zoom / 15)); // Scale từ 0.5 đến 2 dựa trên zoom
-      
-      // Cập nhật tất cả label icon
-      document.querySelectorAll('.label-icon div').forEach(label => {
-        const currentTransform = label.style.transform;
-        const baseTransform = currentTransform.replace(/scale\([^)]*\)/g, '').trim();
-        label.style.transform = `${baseTransform} scale(${scale})`;
-      });
-    }
+
     
     // Hàm bật/tắt chế độ tự động hiển thị mục tiêu
     function toggleAutoShowTargets() {
@@ -2976,9 +2982,7 @@
       updateStatus('Sẵn sàng vẽ tuyến đường - Mục tiêu sẽ hiển thị khi tìm kiếm');
     }, 1000);
     
-    // Thêm event listener cho zoom để cập nhật label
-    map.on('zoomend', updateLabelPositions);
-    map.on('moveend', updateLabelPositions);
+
     
     // ===== CÁC HÀM QUẢN LÝ TARGETS =====
     
